@@ -1,0 +1,222 @@
+"""
+Suite de Pruebas Automatizadas para el Auditor Documental DIGEMID.
+Valida unitaria e integralmente cada regla de los Catálogos A, B y C.
+"""
+
+import pytest
+from core.models import Severity, Category, DocumentMetadata, DocumentReport
+from core.rules.scientific_typos import ScientificTypoRules
+from core.rules.structure import StructureIntegrityRules
+from core.rules.cross_clash import CrossDocumentConsistencyEngine
+from core.rules.digemid_legal import DigemidLegalRules
+from core.visual_inspector import VisualInspector
+from core.auditor import DigemidDocumentAuditor
+
+
+# ==============================================================================
+# PRUEBAS DEL CATÁLOGO A: ERRORES TIPOGRÁFICOS, CIENTÍFICOS Y TRADUCCIÓN
+# ==============================================================================
+
+def test_sal_positive_exponent_detected():
+    rules = ScientificTypoRules()
+    text = "The sterilization process achieved a Sterility Assurance level (SAL of 10^6) under EO gas."
+    findings = rules.analyze_document("sterilization_test.pdf", {1: text})
+    
+    assert any(f.severity == Severity.FATAL and "SAL" in f.title for f in findings)
+    assert any("10^6" in f.detected_text or "SAL" in f.detected_text for f in findings)
+
+
+def test_sal_negative_exponent_not_flagged():
+    rules = ScientificTypoRules()
+    text = "The cycle achieved a validated Sterility Assurance Level (SAL 10^-6) compliant with ISO 11135."
+    findings = rules.analyze_document("clean_sterilization.pdf", {1: text})
+    
+    sal_fatals = [f for f in findings if f.severity == Severity.FATAL and "SAL" in f.title]
+    assert len(sal_fatals) == 0
+
+
+def test_iso_typos_and_derogations():
+    rules = ScientificTypoRules()
+    text = (
+        "Bioburden tests were performed following ISO 111737. "
+        "Risk management was structured under ISO 14971:2012 and MDD 93/42/EEC. "
+        "Labeling graphics comply with EN 980:2008 and quality meets ZSO 9001."
+    )
+    findings = rules.analyze_document("tech_report.pdf", {1: text})
+    
+    assert any("ISO 111737" in f.title for f in findings)
+    assert any("ISO 14971:2012" in f.title for f in findings)
+    assert any("MDD 93/42/EEC" in f.title for f in findings)
+    assert any("EN 980:2008" in f.title for f in findings)
+    assert any("ZSO 9001" in f.title for f in findings)
+
+
+def test_absurd_translations():
+    rules = ScientificTypoRules()
+    text = (
+        "Advertencia: el dispositivo no debe mantenerse mora. "
+        "El doble coleta permite el anclaje seguro de la vegiga al riñón. "
+        "Consulte el gato No. 405 para ordenar repuestos por el tubo."
+    )
+    findings = rules.analyze_document("ifu_espanol.pdf", {1: text})
+    
+    titles = [f.title for f in findings]
+    assert any("no debe mantenerse mora" in t for t in titles)
+    assert any("el doble coleta" in t for t in titles)
+    assert any("de la vegiga" in t for t in titles)
+    assert any("el gato no." in t for t in titles)
+
+
+def test_lexical_english_accent_and_columbia():
+    rules = ScientificTypoRules()
+    text = (
+        "Each sterile blíster pack is labeled for single use. "
+        "Products were exported to Peru and Columbia."
+    )
+    findings = rules.analyze_document("export_details.pdf", {1: text})
+    
+    assert any("blíster" in f.title for f in findings)
+    assert any("columbia" in f.title for f in findings)
+
+
+# ==============================================================================
+# PRUEBAS DEL CATÁLOGO B: ESTRUCTURA, ANEXOS, CAMPOS EN BLANCO Y SALTOS
+# ==============================================================================
+
+def test_blank_artwork_code_and_placeholder():
+    rules = StructureIntegrityRules()
+    text = (
+        "IFU STENT URETERAL\n"
+        "Artwork code with Rev. No.: \n"
+        "Falta agregar breve descripción del proceso de esterilización."
+    )
+    findings = rules.analyze_document("ifu.pdf", {1: text}, tables_data=[])
+    
+    assert any("Artwork code with Rev. No." in f.title for f in findings)
+    assert any("Borrador" in f.title or "Falta agregar" in f.description for f in findings)
+
+
+def test_promised_annex_missing():
+    rules = StructureIntegrityRules()
+    text = (
+        "Section 5.0 Clinical Team:\n"
+        "Annexure 3 CV is attached for the principal clinical reviewer. "
+        "Samples were analyzed at an approved NABL accredited laboratory for ISO 10993-7."
+    )
+    findings = rules.analyze_document("cer.pdf", {1: text}, tables_data=[], all_document_names={"cer.pdf"})
+    
+    assert any("Annexure 3" in f.title for f in findings)
+    assert any("ISO 10993-7" in f.title or "NABL" in f.title for f in findings)
+
+
+def test_section_numbering_jump():
+    rules = StructureIntegrityRules()
+    pages_text = {
+        1: "1.0 Introduction\nSome text\n2.0 Scope\nSome text\n",
+        2: "5.0 Clinical Data\nJumped from 2 to 5 directly."
+    }
+    findings = rules.analyze_document("report.pdf", pages_text, tables_data=[])
+    assert any("Salto Errático en Numeración" in f.title for f in findings)
+
+
+# ==============================================================================
+# PRUEBAS DEL CATÁLOGO C: CONTRADICCIONES INTERNAS Y DESCALCES CRUZADOS
+# ==============================================================================
+
+def test_internal_half_cycles_contradiction():
+    engine = CrossDocumentConsistencyEngine()
+    pages_text = {
+        2: "Section 1.0: In this study 2 half cycles were carried out.",
+        3: "Section 4.0: Three half cycles were performed in the EO chamber."
+    }
+    findings = engine.check_internal_contradictions("sterilization_val.pdf", pages_text)
+    assert any("Contradicción Interna de Semiciclos" in f.title for f in findings)
+
+
+def test_clinical_copy_paste_contaminations():
+    engine = CrossDocumentConsistencyEngine()
+    pages_text = {
+        1: "Similar device design: Bottle/grenade type for urological drain.",
+        2: "Indicated for Gastro-enterological Endoscopic procedures.",
+        3: "Kit Contain: Stent, Umbilical cord clamp, guidewire.",
+        4: "Foley balloon catheter 8Fr-28Fr with balloon 3-50 ml."
+    }
+    findings = engine.check_internal_contradictions("cer_contaminated.pdf", pages_text)
+    
+    titles = [f.title for f in findings]
+    assert any("Bottle/grenade" in t for t in titles)
+    assert any("Gastroenterológicos" in t for t in titles)
+    assert any("Umbilical cord clamp" in t for t in titles)
+    assert any("Foley" in t for t in titles)
+
+
+def test_cross_batch_fr_and_length_clash():
+    engine = CrossDocumentConsistencyEngine()
+    
+    # Doc 1: CLV declara 2-12 Fr y 6-32 cm
+    p1 = engine.extract_document_parameters("CLV.pdf", {1: "Catéter Ureteral Doble J 2-12 Fr, longitud 6-32 cm."})
+    rep1 = DocumentReport(metadata=DocumentMetadata("CLV.pdf", "", "PDF", 1), parameters=p1)
+
+    # Doc 2: DVR declara 3-8 Fr y 70-90 cm (infiltración)
+    p2 = engine.extract_document_parameters("DVR.pdf", {1: "Diameter 3-8 Fr & length 70-90 cm."})
+    rep2 = DocumentReport(metadata=DocumentMetadata("DVR.pdf", "", "PDF", 1), parameters=p2)
+
+    cross_findings = engine.check_batch_consistency({"CLV.pdf": rep1, "DVR.pdf": rep2})
+    
+    assert any("Descalce Dimensional en Calibres Fr" in f.title for f in cross_findings)
+    assert any("Infiltración de Producto Distinto: Longitud de 70–90 cm" in f.title for f in cross_findings)
+
+
+def test_cross_batch_shelf_life_clash():
+    engine = CrossDocumentConsistencyEngine()
+    
+    # Doc 1: DVR dice 3 años
+    p1 = engine.extract_document_parameters("DVR.pdf", {1: "Shelf life: 3 years (36 months)."})
+    rep1 = DocumentReport(metadata=DocumentMetadata("DVR.pdf", "", "PDF", 1), parameters=p1)
+
+    # Doc 2: Lotes Accuprec dicen 5 años
+    p2 = engine.extract_document_parameters("Lab.pdf", {1: "Tested shelf life: 5 years (60 months)."})
+    rep2 = DocumentReport(metadata=DocumentMetadata("Lab.pdf", "", "PDF", 1), parameters=p2)
+
+    cross_findings = engine.check_batch_consistency({"DVR.pdf": rep1, "Lab.pdf": rep2})
+    assert any("Descalce Severo de Vida Útil" in f.title for f in cross_findings)
+
+
+def test_cross_batch_set_components_contradiction():
+    engine = CrossDocumentConsistencyEngine()
+    
+    # Doc 1: Carta fabricante declara SET con accesorios
+    p1 = engine.extract_document_parameters("Carta.pdf", {1: "Ureteral Stent Set with pusher, guidewire and clamp."})
+    rep1 = DocumentReport(metadata=DocumentMetadata("Carta.pdf", "", "PDF", 1), parameters=p1)
+
+    # Doc 2: CER declara que no contiene componentes
+    p2 = engine.extract_document_parameters("CER.pdf", {1: "The device doesn't contain any components."})
+    rep2 = DocumentReport(metadata=DocumentMetadata("CER.pdf", "", "PDF", 1), parameters=p2)
+
+    cross_findings = engine.check_batch_consistency({"Carta.pdf": rep1, "CER.pdf": rep2})
+    assert any("CER Niega Componentes" in f.title for f in cross_findings)
+
+
+# ==============================================================================
+# PRUEBAS DE REGLAS LEGALES DIGEMID
+# ==============================================================================
+
+def test_digemid_colombia_sas_detected():
+    rules = DigemidLegalRules()
+    text = (
+        "Nosotros, ACE MEDICAL DEVICES PVT. LTD. confirmamos a APORTE MEDICO S.A.S. "
+        "Manizales - Colombia como TITULAR DE LOS REGISTROS SANITARIOS en Colombia."
+    )
+    findings = rules.analyze_document("carta_colombia.pdf", {1: text})
+    assert any("Documento Legal Autorizado para Colombia" in f.title for f in findings)
+
+
+def test_digemid_historical_importer_teleandes():
+    rules = DigemidLegalRules()
+    text = "Importado y distribuido por Consorcio Teleandes S.A.C. RUC 20537638631."
+    findings = rules.analyze_document("rotulo.pdf", {1: text})
+    assert any("Consorcio Teleandes" in f.title for f in findings)
+
+
+if __name__ == "__main__":
+    pytest.main(["-v", __file__])

@@ -1,0 +1,279 @@
+"""
+Validador de Estructura, Celdas en Blanco, Anexos Prometidos y Numeración.
+Cubre el Catálogo B:
+- Celdas y secciones en blanco en checklists (GSPR) y manuales IFU ('Artwork code with Rev. No.').
+- Tablas que rellenan variables únicamente con la palabra 'Complies' sin corridas, lotes ni equipos reales.
+- Anexos prometidos en el texto pero ausentes en el documento o paquete ('Annexure 3 CV is attached', 'PMS Report attached').
+- Numeración desordenada de secciones (saltos erráticos como 1.1, 1.2, 1.3, 1.4, 3, 4, 5).
+"""
+
+import re
+from typing import List, Dict, Any, Set
+from core.models import Finding, Severity, Category
+
+
+class StructureIntegrityRules:
+    """Reglas de validación estructural y consistencia interna de formatos."""
+
+    def analyze_document(
+        self,
+        document_name: str,
+        pages_text: Dict[int, str],
+        tables_data: List[Dict[str, Any]],
+        all_document_names: Set[str] = None
+    ) -> List[Finding]:
+        findings: List[Finding] = []
+        all_docs = all_document_names or set()
+
+        full_doc_text = "\n".join(pages_text.values())
+
+        # 1. Celdas en blanco críticas y campos vacíos en IFU
+        findings.extend(self._check_blank_fields_and_ifu(document_name, pages_text))
+
+        # 2. Tablas que solo dicen "Complies" sin datos cuantitativos de corrida
+        findings.extend(self._check_complies_only_tables(document_name, tables_data, pages_text))
+
+        # 3. Anexos prometidos en el texto pero ausentes
+        findings.extend(self._check_promised_annexes(document_name, pages_text, full_doc_text, all_docs))
+
+        # 4. Numeración desordenada de secciones
+        findings.extend(self._check_section_numbering(document_name, pages_text))
+
+        return findings
+
+    def _check_blank_fields_and_ifu(self, doc_name: str, pages_text: Dict[int, str]) -> List[Finding]:
+        findings = []
+
+        # Búsqueda de Artwork code en blanco
+        for page_num, text in pages_text.items():
+            # Patrón para 'Artwork code with Rev. No.' seguido de dos puntos o vacío/espacios
+            artwork_match = re.search(
+                r'Artwork\s+code\s+with\s+Rev\.?\s*(?:No\.?|Number)?\s*[:\-_]?\s*(?:\r?\n|$|[ \t]+(?=\r?\n))',
+                text,
+                re.IGNORECASE
+            )
+            if artwork_match:
+                findings.append(Finding(
+                    id=f"STR_ARTWORK_BLANK_{doc_name}_{page_num}",
+                    document_name=doc_name,
+                    page=page_num,
+                    severity=Severity.MINOR,
+                    category=Category.VISUAL_STRUCTURE,
+                    title="Campo Crítico en Blanco en Manual IFU (Artwork code with Rev. No.)",
+                    description=(
+                        f"En la página {page_num} se detectó el campo 'Artwork code with Rev. No.' dejado en blanco. "
+                        "El rotulado e IFU de DIGEMID exige código unívoco de arte y versión controlada."
+                    ),
+                    detected_text=artwork_match.group(0).strip(),
+                    expected_text="Código de arte y revisión asignado (ej: AW-ACE-DJ-01 Rev. 02)",
+                    digemid_norm_ref="D.S. 016-2011-SA Art. 137°",
+                    remediation_advice="Asignar el código de diseño gráfico y revisión en la plantilla del IFU.",
+                ))
+
+            # Búsqueda de "Falta agregar breve descripción" o texto placeholder de borradores
+            draft_placeholder = re.search(r'\b(?:Falta\s+agregar|Pendiente\s+de\s+completar|TO\s+BE\s+ADDED|TBD|PLACEHOLDER)\b', text, re.IGNORECASE)
+            if draft_placeholder:
+                findings.append(Finding(
+                    id=f"STR_PLACEHOLDER_{doc_name}_{page_num}",
+                    document_name=doc_name,
+                    page=page_num,
+                    severity=Severity.CRITICAL,
+                    category=Category.VISUAL_STRUCTURE,
+                    title="Texto de Borrador / Marcador Pendiente Detectado",
+                    description=(
+                        f"Se encontró el marcador de texto provisional '{draft_placeholder.group(0)}' en la página {page_num}. "
+                        "Esto evidencia que el documento se presentó incompleto sin revisión final."
+                    ),
+                    detected_text=draft_placeholder.group(0),
+                    expected_text="Contenido técnico formal y definitivo redactado",
+                    digemid_norm_ref="D.S. 016-2011-SA Art. 130°",
+                    remediation_advice="Eliminar los comentarios de borrador y redactar el contenido técnico faltante.",
+                ))
+
+        return findings
+
+    def _check_complies_only_tables(
+        self,
+        doc_name: str,
+        tables_data: List[Dict[str, Any]],
+        pages_text: Dict[int, str]
+    ) -> List[Finding]:
+        findings = []
+
+        # Analizar si es un reporte de validación o ensayo
+        doc_lower = doc_name.lower()
+        if not any(k in doc_lower for k in ["sterilization", "esterilizacion", "validation", "dvr", "verification"]):
+            return findings
+
+        for t_info in tables_data:
+            page_num = t_info.get("page", 1)
+            rows = t_info.get("rows", [])
+            if len(rows) < 3:
+                continue
+
+            complies_count = 0
+            total_data_cells = 0
+
+            for r in rows[1:]: # Omitir cabecera
+                for cell in r:
+                    val = str(cell).strip().lower()
+                    if val in ["complies", "cumple", "pass", "ok"]:
+                        complies_count += 1
+                    if len(val) > 0:
+                        total_data_cells += 1
+
+            # Si más del 70% de las celdas de datos son simplemente "Complies" sin valores numéricos
+            if total_data_cells >= 4 and (complies_count / total_data_cells) >= 0.70:
+                findings.append(Finding(
+                    id=f"STR_COMPLIES_ONLY_{doc_name}_{page_num}",
+                    document_name=doc_name,
+                    page=page_num,
+                    severity=Severity.CRITICAL,
+                    category=Category.VISUAL_STRUCTURE,
+                    title="Tabla de Validación con Relleno Exclusivo 'Complies' Sin Datos Cuantitativos",
+                    description=(
+                        f"En la página {page_num}, la tabla técnica contiene {complies_count} celdas marcadas "
+                        "únicamente como 'Complies', sin reportar valores reales medidos, fechas de corrida, "
+                        "números de lote del stent ni identificación de la cámara o equipos. "
+                        "DIGEMID observa protocolos que no demuestran trazabilidad cuantitativa real."
+                    ),
+                    detected_text=f"{complies_count} de {total_data_cells} celdas dicen solo 'Complies'",
+                    expected_text="Parámetros reales: Lote, fecha, concentración EO, temperatura, D-value, resultado numérico",
+                    digemid_norm_ref="D.S. 016-2011-SA Art. 130° / ISO 11135",
+                    remediation_advice="Reemplazar 'Complies' por datos específicos de las corridas de validación física y microbiológica.",
+                ))
+                break # Una alerta por tabla/documento es suficiente
+
+        return findings
+
+    def _check_promised_annexes(
+        self,
+        doc_name: str,
+        pages_text: Dict[int, str],
+        full_doc_text: str,
+        all_document_names: Set[str]
+    ) -> List[Finding]:
+        findings = []
+
+        # Expresiones regulares para promesas de anexos
+        annex_patterns = [
+            (
+                r'Annexure\s+(\d+|[A-Z0-9]+)\s+(?:CV\s+)?(?:is\s+)?attached',
+                "Hoja de vida / Anexo prometido ({matched}) no adjunto"
+            ),
+            (
+                r'PMS\s+Report\s+attached',
+                "Reporte de Vigilancia Post-Comercialización (PMS) citado como adjunto pero no incorporado"
+            ),
+            (
+                r'(?:approved\s+)?NABL(?:\s+accredited)?\s+laboratory\b[^\.\n]{0,80}\bISO\s*10993-7',
+                "Reporte NABL de residuales de Óxido de Etileno (ISO 10993-7) prometido pero no adjunto"
+            ),
+            (
+                r'Anexo\s+IN-DM-\d+',
+                "Referencia a Anexo IN-DM no adjunto o inexistente"
+            ),
+        ]
+
+        full_lower = full_doc_text.lower()
+        all_docs_lower = [d.lower() for d in all_document_names]
+
+        for page_num, text in pages_text.items():
+            for pat, desc_template in annex_patterns:
+                for match in re.finditer(pat, text, re.IGNORECASE):
+                    matched_str = match.group(0)
+
+                    # Verificar si existe como encabezado dentro del propio PDF o como archivo independiente
+                    is_found = False
+
+                    # Si es NABL ISO 10993-7
+                    if "10993-7" in matched_str:
+                        # Buscar si hay mención explícita a un reporte NABL con número en todo el documento o paquete
+                        if not any("nabl" in d or "residual" in d or "10993-7" in d for d in all_docs_lower):
+                            # Tampoco hay reporte NABL con mg/dispositivo en el texto
+                            if not re.search(r'\b(?:mg/device|µg/device|mg/dispositivo)\b', full_lower):
+                                findings.append(Finding(
+                                    id=f"ANNEX_MISSING_NABL_{doc_name}_{page_num}",
+                                    document_name=doc_name,
+                                    page=page_num,
+                                    severity=Severity.FATAL,
+                                    category=Category.VISUAL_STRUCTURE,
+                                    title="Reporte de Ensayos Residuales de EO (ISO 10993-7) Prometido pero Ausente",
+                                    description=(
+                                        f"En la página {page_num} se afirma haber enviado muestras a un laboratorio NABL "
+                                        "para ensayos de residuales bajo ISO 10993-7, pero no se adjunta el informe analítico "
+                                        "ni se reportan los valores cuantitativos de óxido de etileno (EO) y etilenclorhidrina (ECH). "
+                                        "Esto es motivo de rechazo directo por DIGEMID."
+                                    ),
+                                    detected_text=matched_str,
+                                    expected_text="Informe analítico completo del laboratorio NABL con límites según ISO 10993-7",
+                                    digemid_norm_ref="D.S. 016-2011-SA Art. 130° / ISO 10993-7",
+                                    remediation_advice="Adjuntar el informe de ensayo de residuales emitido por el laboratorio NABL acreditado.",
+                                ))
+
+                    elif "Annexure" in matched_str:
+                        # Extraer el identificador del anexo
+                        m_id = re.search(r'Annexure\s+(\d+|[A-Z0-9]+)', matched_str, re.IGNORECASE)
+                        annex_id = m_id.group(1) if m_id else ""
+                        # Verificar si existe en el texto del documento
+                        if f"annexure {annex_id.lower()}" not in full_lower.replace(matched_str.lower(), ""):
+                            findings.append(Finding(
+                                id=f"ANNEX_MISSING_{annex_id}_{doc_name}_{page_num}",
+                                document_name=doc_name,
+                                page=page_num,
+                                severity=Severity.CRITICAL,
+                                category=Category.VISUAL_STRUCTURE,
+                                title=f"Anexo Citado como Adjunto Ausente (Annexure {annex_id})",
+                                description=(
+                                    f"En la página {page_num} el texto declara '{matched_str}', "
+                                    f"pero dicho anexo no se encuentra al final del documento ni como archivo adjunto."
+                                ),
+                                detected_text=matched_str,
+                                expected_text=f"Anexo {annex_id} completo incorporado al final del documento",
+                                digemid_norm_ref="D.S. 016-2011-SA Art. 130°",
+                                remediation_advice=f"Incorporar físicamente el Annexure {annex_id} prometido en el índice y anexo.",
+                            ))
+
+        return findings
+
+    def _check_section_numbering(self, doc_name: str, pages_text: Dict[int, str]) -> List[Finding]:
+        findings = []
+
+        # Extraer numerales tipo 1.1, 1.2, 1.3... o 1.0, 2.0... o 1, 2, 3
+        sections = []
+        for page_num, text in pages_text.items():
+            lines = text.split("\n")
+            for line in lines:
+                m = re.match(r'^(?:Sec(?:tion)?\.?\s*)?(\d+(?:\.\d+)*)\s+[A-Z]', line.strip())
+                if m:
+                    sec_str = m.group(1)
+                    sections.append((page_num, sec_str))
+
+        if len(sections) >= 2:
+            prev_main = None
+            for p_num, s_str in sections:
+                parts = s_str.split(".")
+                if parts[0].isdigit():
+                    curr_main = int(parts[0])
+                    if prev_main is not None:
+                        if curr_main > prev_main + 1 and curr_main <= prev_main + 5:
+                            findings.append(Finding(
+                                id=f"STR_SEC_JUMP_{doc_name}_{p_num}_{prev_main}_{curr_main}",
+                                document_name=doc_name,
+                                page=p_num,
+                                severity=Severity.MINOR,
+                                category=Category.VISUAL_STRUCTURE,
+                                title=f"Salto Errático en Numeración de Secciones ({prev_main} a {curr_main})",
+                                description=(
+                                    f"En la página {p_num} la numeración pasa bruscamente de la sección {prev_main} "
+                                    f"a la sección {curr_main}, omitiendo el numeral correlativo intermedio."
+                                ),
+                                detected_text=f"Salto de sección: {prev_main} -> {curr_main}",
+                                expected_text=f"Sección correlativa {prev_main + 1}",
+                                digemid_norm_ref="Formato y consistencia documental",
+                                remediation_advice="Renumerar los títulos de sección correlativamente.",
+                            ))
+                            break
+                    prev_main = curr_main
+
+        return findings

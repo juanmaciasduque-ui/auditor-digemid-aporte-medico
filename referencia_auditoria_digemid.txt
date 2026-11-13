@@ -1,0 +1,1356 @@
+=== PAGINA 1 ===
+DICTAMEN REGULATORIO PERICIAL: NO APTO PARA PRESENTACIÓN EN VUCE
+La documentación enviada el 21 de octubre de 2026 por ACE Medical Devices Pvt. Ltd. (reenviada por Paula Victoria el 7 de
+noviembre de 2026) y los antecedentes de Soul Quality y Alegroup Perú S.A.C. contienen defectos técnicos fatales e
+inconsistencias jurídicas severas. Si este paquete se radica ante DIGEMID tal como está, generará una tercera denegatoria
+consecutiva (con pérdida adicional de la tasa TUPA 250 de S/ 1,812.00) y expone a la droguería a procedimientos administrativos
+sancionadores, nulidad de registro, cierre temporal y eventual denuncia penal por manipulación/edición de informes firmados
+y omisiones de Dirección Técnica y BPA.
+2 Denegatorias +
+1 Vencido
+CRS 219 (DM17365E) venció
+18/07/2024; Exp. 25039778
+desistido/observado (Jul-2025);
+Exp. 25157794 denegado R.D.
+4453-2026 (27/05/2026).
+8 de 8 Archivos
+Todos los PDF del paquete
+Dropbox Oct-2026 de ACE
+contienen defectos críticos: faltan
+firmas, normas EU vs D.S. 003-
+2020-SA, rangos y datos crudos.
+91 Unidades
+Stock de Stent Doble J con R.S.
+DM17365E vencido recluido en
+Área de Bajas de Alegroup desde
+24/09/2024 (6Fr: 21 und; 4.7Fr: 70
+und).
+BPA Vencido +
+DT
+BPA 1132-2023 de Alegroup
+venció 03/07/2026; Carta
+DIGEMID 11725-2026 exige
+adecuar horario al Comunicado
+012-2026; DT renunció 02–
+05/10/2026.
+Síntesis de Hallazgos Principales y Alcance Documental Auditado
+Se ejecutó una revisión forense página por página sobre todo el acervo documental recuperado de Gmail
+( juanmaciasduque@gmail.com ), enlaces de Dropbox de ACE Medical ( 21/10/2026 ), archivos de Google Drive de la droguería, correos de
+Soul Quality y Alegroup (2023–2026), y el dossier aprobado de referencia Uroclamp (R.D. 5049-2024 / DM28314E) :
+Raíz de los rechazos repetitivos: Nunca se definió un maestro único del producto entre el Certificado de Libre Venta (CLV), la Carta
+del Fabricante y el dossier técnico. Se mezclaron sistemáticamente dos productos distintos del propio fabricante: Ureteral
+Catheter (Ítem 02 del FSC, 70–90 cm) y DJS Stent / Ureteral Stent (Ítem 15 del FSC, 6–32 cm), además de haberse filtrado páginas de
+un catéter balón Foley (2012, 8–28 Fr) y un informe chino de 2017 con sello superpuesto de ACE.
+Riesgo grave por adulteración/edición de terceros: Existen correos escritos de Soul Quality proponiendo "actualizar la fecha" de
+informes de biocompatibilidad editables de 2022 y retirar normas ISO de un Checklist ya firmado, además de haber reconocido la
+edición del "100% de los documentos" del Exp. 25157794. Bajo el TUO de la Ley N° 27444 y la Ley N° 29459, la responsabilidad penal
+y administrativa recae directamente sobre el Representante Legal que firma la Declaración Jurada.
+Alcance y brechas de archivos inaccesibles: No pudieron descargarse por requerir autenticación interna o estar caducados: (a) el
+enlace SharePoint de Soul Quality EXP. N°25157794_URETERAL STENT_DOC. SUBIDOS VUCE.rar (06/04/2026); (b) Doc. Presentados
+_URETERAL STENT.rar (02/06/2026); (c) los ZIP de Cinta Vaginal ( Exp. 24-010523-1 / R.D. 7456 ); y (d) el enlace caducado de
+WeTransfer del 19/12/2025 ( we.tl/t-xcYK4B1bBR ). Su contenido fue reconstruido indirectamente mediante la Notificación oficial
+2026068505, los informes INF 001/002/003 de Soul Quality y las capturas adjuntas.
+AUDITORÍA FORENSE TÉCNICO-REGULATORIA · DIGEMID PERÚ · CLASE III (ALTO RIESGO)
+INFORME INTEGRAL DE AUDITORÍA DOCUMENTAL:
+CATÉTERES URETERALES (DOBLE J / STENT URETERAL
+Y SET)
+Diagnóstico exhaustivo de incumplimientos normativos, defectos documentales, errores tipográficos y de
+traducción, inconsistencias de sellos y fechas, riesgos sancionatorios ante DIGEMID y plan correctivo completo
+frente a ACE Medical Devices Pvt. Ltd., Soul Quality y Alegroup Perú S.A.C.
+TITULAR / DROGUERÍA EN PERÚ
+APORTE MÉDICO PERÚ S.A.C.
+RUC: 20610321268 · Código EF: 0110592
+Gerente General: Juan Sebastián Macías
+Duque (C.E. 005538355)
+FABRICANTE Y CASA MATRIZ
+ACE Medical Devices Pvt. Ltd. (401A, Gera
+77, East Avenue, Kalyani Nagar, Pune
+411006, India)
+Casa Matriz: Aporte Médico S.A.S.
+(Manizales, Colombia)
+OPERADORES / FECHA DE CORTE
+Consultora: Soul Quality SAC (Q.F. Cinthia
+Chumacero / Q.F. Evana Chavez)
+Almacén: Alegroup Perú S.A.C. (RUC
+20610058923, EF 0111920)
+Fecha de Auditoría: 11 de noviembre de
+2026
+
+
+=== PAGINA 2 ===
+AUDITORÍA REGULATORIA DIGEMID · URETERAL STENT / CATÉTERES DOBLE J
+APORTE MÉDICO PERÚ S.A.C. (RUC 20610321268)
+Página 2 de 14
+Documento Técnico-Regulatorio Confidencial · Emitido: 11/11/2026
+1
+ Marco Normativo DIGEMID y Parámetros Obligatorios (Perú e India)
+Para lograr la inscripción o reinscripción del Ureteral Stent / Doble J y Set sin observaciones ni riesgos sancionatorios, el expediente
+debe satisfacer simultáneamente el bloque legal peruano y las exigencias sanitarias del país de origen (India). La siguiente tabla resume
+los parámetros legales vinculantes verificados:
+Norma / Disposición
+Parámetro Legal Exigible ante
+DIGEMID
+Implicancia Directa para Catéter Ureteral
+Doble J
+Riesgo de Incumplimiento
+Ley N° 29459
+(Arts. 5, 8, 10, 12, 44–52)
+Todo dispositivo médico requiere
+Registro Sanitario (RS) vigente previo
+a su importación y comercialización.
+El titular responde por calidad,
+seguridad y veracidad.
+Vencido el DM17365E el 18/07/2024, está
+prohibida toda importación o venta. El stock
+residual en Alegroup debe permanecer
+inmovilizado en Área de Bajas o destruirse.
+CRÍTICO / SANCIÓN
+Multa, incautación y cierre por
+venta sin RS vigente.
+D.S. N° 016-2011-SA
+(Anexo V, Reglas 5 y 8;
+Art. 126°)
+Clasificación de Riesgo: Regla 5
+(invasivo por orificio corporal hasta 30
+días = Clase I/II) vs. Regla 8
+(quirúrgicamente invasivo o
+implantable ≥ 30 días = Clase III Alto
+Riesgo).
+Art. 126°: Exige todos los requisitos
+Clase III (TUPA 250).
+DIGEMID clasificó históricamente este
+producto como CLASE III (R.D. 6090-2019 y
+Exp. 25157794). Queda prohibido presentar
+Declaraciones de Conformidad o GSPR que
+digan "Clase II / IIa / IIb / Regla 5" sin
+justificar su equivalencia regulatoria.
+RECHAZO SEGURO
+Observación directa 4.5 en
+Notif. 2026068505 y
+denegatoria.
+D.S. N° 016-2011-SA
+(Art. 126° num. 2 y 3 · CLV
+y BPM)
+CLV: Antigüedad máxima 2 años
+desde emisión salvo vigencia menor
+declarada en el propio certificado;
+emitido por Autoridad Sanitaria
+Competente del país exportador,
+apostillado/legalizado.
+BPM / ISO 13485: Certificado vigente
+que acredite Buenas Prácticas de
+Manufactura.
+En India, bajo las Medical Devices Rules 2017
+(CDSCO), los stents ureterales están
+regulados (Clase B o C) y requieren licencia
+CDSCO Form MD-5 (Clase B, autoridad
+estatal) o Form MD-9 (Clase C, autoridad
+central) y FSC de CDSCO. Un CLV del DGFT
+indica vigencia de "1 year" y declara "not
+covered under Drugs & Cosmetics Act 1940",
+además de llegar con sellos ilegibles.
+CRÍTICO / RECHAZO
+Rechazado en Exp. 25039778
+por sello borroso, falta de
+OMS/CDSCO y descalce de
+modelos.
+D.S. N° 016-2011-SA
+(Art. 130° num. 1–10 ·
+Informe Técnico)
+Exige descripción detallada,
+composición cuali-cuantitativa,
+especificaciones técnicas por
+código/modelo, vida útil validada,
+presentaciones y Art. 130°.5:
+flujograma de manufactura
+acompañado de la descripción
+resumida de cada fase.
+Todo borrador u original debe definir código
+SKU, diámetro Fr exacto, longitud en cm,
+componentes del Set (Empujador, Guía,
+Clamp, Hilo), porcentaje de
+ftalatos/radiopacificantes y el flujograma con
+descripción etapa por etapa hasta el
+producto estéril terminado.
+RECHAZO SEGURO
+Motivo de las observaciones
+1.1 a 1.8 en Notif.
+2026068505.
+D.S. N° 003-2020-SA
+(Principios Esenciales de
+Seguridad y Desempeño)
+Lista de Verificación alineada a la
+estructura peruana de Principios
+Esenciales (Anexo I del D.S. 003-2020-
+SA) o equivalencia trazable con
+normas técnicas vigentes y códigos
+reales de documentos adjuntos.
+El fabricante envió un GSPR europeo (MDR
+2017/745) sin tabla de equivalencia al D.S.
+003-2020-SA, con textos copiados de
+endoscopia GI, ítems en blanco y normas que
+no coinciden con los reportes reales
+presentados.
+RECHAZO SEGURO
+Motivo de observaciones 2.1 a
+2.6 en Notif. 2026068505.
+D.S. N° 016-2011-SA
+(Art. 138° · Rotulado e
+IFU)
+Rotulado mediato e inmediato en
+idioma español. Prohibido el
+pegado/sticker salvo para adicionar
+datos del importador. Identificación
+inequívoca por código/medida;
+prohíbe rangos genéricos en
+etiquetas unitarias. Exige nombre y
+país del fabricante (lit. "m") y datos
+del Titular en Perú.
+Las etiquetas históricas aún muestran a
+Consorcio Teleandes S.A.C. en inglés, dirección
+antigua de Surco, rango 2–12 Fr sin SKU
+único y símbolos erróneos de ISO 15223-1.
+Deben diseñarse artes nuevos para Aporte
+Médico Perú S.A.C.
+OBSERVACIÓN SEGURA
+Observaciones 8.1–8.3 y 9.1–
+9.2 en Notif. 2026068505.
+D.S. N° 014-2011-SA &
+Comunicado N° 012-
+2026-DIGEMID
+(25/08/2026)
+La droguería debe contar con Director
+Técnico (Q.F.) con presencia efectiva
+mínima de 4 horas diarias (salvo
+régimen diferenciado autorizado) y un
+horario de funcionamiento acorde
+al horario laboral DIGEMID (L–V
+08:00–17:00), además de BPA
+vigente.
+Aporte Médico operaba con el horario COVID
+de 2 h/semana (Lunes 11–13 h) y luego
+intentó declarar 6 h/semana (Mié y Vie 8–11
+h). Esto motivó la Carta 11725-2026 bajo
+apercibimiento de denegar la certificación
+BPA (Exp. 26-037851-1). El BPA 1132-2023 de
+Alegroup venció el 03/07/2026.
+CRÍTICO / CIERRE
+Apercibimiento de
+improcedencia BPA, cierre
+temporal (como R.D. 1881-
+2023) o multa.
+
+
+=== PAGINA 3 ===
+AUDITORÍA REGULATORIA DIGEMID · URETERAL STENT / CATÉTERES DOBLE J
+APORTE MÉDICO PERÚ S.A.C. (RUC 20610321268)
+Página 3 de 14
+Documento Técnico-Regulatorio Confidencial · Emitido: 11/11/2026
+Norma / Disposición
+Parámetro Legal Exigible ante
+DIGEMID
+Implicancia Directa para Catéter Ureteral
+Doble J
+Riesgo de Incumplimiento
+TUO Ley N° 27444 (Art.
+34)
+Código Penal (Arts. 411,
+427)
+Privilegio de controles posteriores:
+toda declaración jurada o documento
+adulterado en fecha, firma, resultado
+o laboratorio conlleva nulidad de
+oficio, multa, inhabilitación y denuncia
+penal por falsedad.
+Proponer alterar fechas en reportes GLP de
+Accuprec (2022) o borrar normas ISO en
+documentos firmados por el fabricante, o
+usar un reporte chino de 2017 con el
+membrete de ACE superpuesto, constituye
+causal directa de sanción grave.
+RIESGO PENAL
+Responsabilidad solidaria de
+Gerente General y DT ante
+Procuraduría MINSA.
+2
+ Reconstrucción Histórica de Expedientes y Análisis de Rechazos (2019–2026)
+La cadena de expedientes revela por qué se han perdido tasas administrativas y años comerciales desde la expiración del registro
+transferido originalmente por Consorcio Teleandes:
+Fecha
+Expediente / Resolución
+Actor / Evaluador
+Hecho Verificado y Motivo de Falla / Secuela
+23/07/2019
+R.D. 6090-2019
+R.S. DM17365E
+Consorcio Teleandes
+S.A.C. / DIGEMID UFDM
+Se autoriza inscripción inicial Clase III de URETERAL STENT SET (vigencia
+18/07/2019–18/07/2024) con 180 códigos exactos (3–8 Fr, 06–32 cm).
+Advertía explícitamente sobre ftalatos en varones, niños y gestantes.
+12/10/2021
+R.D. 9503-2021
+Exp. 21-090500-1
+Teleandes → Farma Italia
+S.A.C.
+Transferencia de RS por fabricante y país (incluye DM16557E Guide Wire,
+DM17365E Ureteral Stent Set, DM17009E Stone Retrieval Basket y
+DM16577E Bladder Evacuator).
+09/01/2023
+R.D. 000085-2023
+Exp. 22-142241-1
+Aporte Médico Perú
+S.A.C. / DICER
+Autorización sanitaria de apertura de droguería (Of. Surco; Almacén
+Roesfarma VMT; Q.F. Cinthia Chumacero) bajo excepción COVID (D.S. 018-
+2020-SA) con horario excepcional de solo lunes 11:00–13:00.
+24/02/2023
+CRS N° 219-2023
+Exp. 23-018762-1
+Aporte Médico Perú /
+Pago S/ 2,725 (17/02)
+Se emite Certificado de Registro Sanitario sobre el DM17365E. Error
+estratégico: nunca se gestionó oportunamente la reinscripción ni el
+registro nuevo antes de su vencimiento el 18/07/2024.
+29/05–
+12/06/2023
+R.D. 1881 / 1922 /
+2068-2023 & Acta
+000445
+DIGEMID DICER /
+Aduanas / Tranlogistics
+Roesfarma rescinde contrato (04/05/2023) → DIGEMID aplica Medida de
+Seguridad de Cierre Temporal (R.D. 1881). Se aprueba traslado a
+Alegroup SJM (R.D. 1922) y levantamiento (R.D. 2068). En paralelo,
+Aduanas inmoviliza carga aérea BOG–LIM el 15/06/2023 (Acta 000445).
+23–
+24/09/2024
+Correo Q.F. Lizeth Rojas /
+Q.F. Cristhofer Cortez
+Soul Quality ↔ Alegroup
+Perú
+Confirmado el vencimiento de DM17365E (18/07/2024), se ordena mover
+91 unidades en almacén al Área de Bajas (21 und 6Fr 24cm; 70 und 4.7Fr
+24cm). Siguen retenidas sin registro vigente.
+21/03–
+24/07/2025
+Exp. 25039778
+Sol. 2025168176 (S/
+1,812)
+Soul Quality / DIGEMID
+UFDM
+Nuevo trámite de inscripción Clase III observado el 30/05/2025. Al vencer
+los plazos el 24/07/2025 por sello borroso del CLV, descalce modelos vs
+rotulado y falta de informes completos, la evaluadora advierte denegatoria
+inminente y fuerza el desistimiento.
+19/12/2025
+Exp. 25157794
+SUCE 2025894026 (S/
+1,812)
+Soul Quality (Inf. 003) /
+Q.F. Jacqueline Tipacti
+Segundo intento TUPA 250. Soul Quality declara por correo haber editado
+el "100% de los documentos recepcionados" e introduce errores graves
+(vida útil "1 día", componentes contradictorios, CER del Catéter 70–90 cm).
+13/03/2026
+Notif. 2026068505
+(23:35:29 h)
+DIGEMID UFDM (Q.F.
+Jacqueline Tipacti)
+DIGEMID notifica 10 grupos con más de 25 sub-observaciones que
+desmontan todo el expediente (código, medidas, ftalatos, flujograma Art.
+130.5, D.S. 003-2020-SA, biocompatibilidad, DoC Clase II vs III, gestión de
+riesgo, evaluación clínica, IFU, rotulado y DISMED).
+20/04–
+27/05/2026
+Subsanación
+28/04/2026 → Doc.
+Res. 2026334577 /
+R.D. 4453-2026
+Reasignado a Rafael
+Vásquez (digemid050)
+Soul Quality sube la subsanación tarde (28/04/2026, tras plazo interno
+23/04) incluyendo archivos Word editables
+(citotoxicidad/sensibilización/gestión de riesgo). El 27/05/2026 DIGEMID
+emite Denegatoria formal.
+01/06–
+21/10/2026
+Correos Soul Quality ↔
+ACE / Carta 11725 / Oct-
+2026
+Evana Chavez, Paula
+Victoria, Jorge Restrepo,
+Anuja Khidse
+Soul Quality solicita pruebas de biocompatibilidad editables para cambiar
+fechas y borra ISOs del GSPR firmado. Paralelamente DIGEMID observa el
+BPA por horario (Carta 11725), renuncia la DT (02/10) y se inscribe nuevo
+DT con 6 h/sem. El 21/10/2026 ACE envía nuevo paquete Dropbox; Paula
+lo remite el 07/11/2026 para esta auditoría.
+
+
+=== PAGINA 4 ===
+AUDITORÍA REGULATORIA DIGEMID · URETERAL STENT / CATÉTERES DOBLE J
+APORTE MÉDICO PERÚ S.A.C. (RUC 20610321268)
+Página 4 de 14
+Documento Técnico-Regulatorio Confidencial · Emitido: 11/11/2026
+Auditoría de la Notificación DIGEMID N° 2026068505 (Exp. 25157794) frente al Paquete Actual (Octubre 2026)
+Ítem
+DIGEMID
+Observación Literal / Sustantiva de DIGEMID
+(13/03/2026)
+Causa Raíz en Exp. 25157794
+Estado en Paquete ACE Oct-2026
+1.1 – 1.4
+Identificación inequívoca por código, modelo, diámetro
+Fr, longitud, componentes y características técnicas
+diferenciales.
+Se declararon rangos genéricos (2–12
+Fr, 6–32 cm), 5 componentes sin
+detalle y conflicto contra el CER (sin
+componentes).
+NO RESUELTO
+El Technical Report Oct-2026
+tampoco lista códigos, medidas ni
+componentes.
+1.5
+Indicar diferenciación de "tres tipos de catéteres según
+materia prima" en dispositivos, rotulado e IFU.
+Frase suelta en Informe Técnico
+(Poliuretano, Silicona, Compuesto) sin
+correlato en SKU ni etiquetas.
+NO RESUELTO
+En GSPR/CER hablan de
+PU/Silicona/Material compuesto
+sin tabla ni % por modelo.
+1.6 y 8.2
+Se declara vida útil de 1 día en Informe Técnico p.4 y
+en IFU f.2 (incoherente con el producto).
+Confusión de Soul Quality al editar el
+borrador entre permanencia/uso
+único vs vida útil en anaquel.
+CONTRADICTORIO
+DVR dice 3 años; lotes Accuprec
+prueban 5 años (09/2021–
+08/2026); TR lo omite.
+1.7
+Porcentaje exacto de ftalatos en materiales y cómo
+minimiza el fabricante sus riesgos en humanos.
+Se presentó solo carta declarativa de
+no ftalatos sin reporte analítico
+SVHC/ECHA que Soul Quality pidió
+siguiendo modelo TÜV (168513809f
+001).
+FALTANTE TOTAL
+GSPR 10.4.3 niega CMR/ftalatos sin
+ensayo químico; IFU 2019
+contradice advirtiendo ftalatos.
+1.8
+Flujograma básico sin descripción resumida de cada
+fase (contravención Art. 130° num. 5 D.S. 016-2011-SA).
+Se adjuntó gráfico de flujo sin texto
+explicativo de etapas (el borrador
+DOCX dice "Falta agregar breve
+descripción").
+FALTANTE TOTAL
+No incluido en el nuevo paquete
+de ACE.
+2.1 – 2.6
+Informes de despacho incoherentes, cita "Anexo IN-DM-
+003", uso indebido de CER en P.E. 7.1, "informe de
+prueba" indefinido en 7.3, descalce en 7.5 y falta
+estructura D.S. 003-2020-SA.
+Checklist corrupto y desactualizado
+editado manualmente sin
+concordancia documental ni
+homologación normativa peruana.
+DEFICIENTE
+Nuevo GSPR (62p) bajo EU MDR,
+con tabla incompleta p.62 y texto
+GI copiado (ítem 18.8).
+3 y 10
+Falta Carta de Fabricante sustentando códigos, modelos
+y componentes del Set (Art. 126°); DISMED sin
+componentes.
+Omisión en carga VUCE o
+discrepancia de modelos frente al
+CLV.
+FALTANTE TOTAL
+No viene Carta de Fabricante ni
+DISMED actualizado en el paquete
+Oct-2026.
+4.1 – 4.4
+Resumen Verificación/Validación indica 3–10 Fr y 70–90
+cm vs IT 2–12 Fr y 6–32 cm; faltan biocompatibilidad,
+referencia en GSPR, ensayos funcionales, criterios y
+normas.
+ACE/Soul Quality mezcló el
+documento del Ureteral Catheter (70–
+90 cm) con el del Stent Doble J (6–32
+cm).
+NO RESUELTO
+DVR Oct-2026 sigue siendo
+protocolo teórico (sin datos reales
+ni ensayos medidos) y usa 3–8 Fr /
+8–30 cm.
+4.5
+Declaración de Conformidad dice Clase II y Carta de
+Fabricante dice Clase III.
+DoC europea bajo MDD 93/42/EEC
+(Clase IIa Regla 5 / IIb) sin nota
+explicativa de clasificación Perú.
+NO RESUELTO
+Accuprec y CER Oct-2026 insisten
+en Clase IIa Regla 5 / IIb.
+5 y 6
+Gestión de Riesgo: frase prometida para IFU (p.12) no
+figura en el IFU; faltan niveles de probabilidad,
+severidad y tabla/matriz (Art. 126° num. 8).
+Se presentó un fragmento incompleto
+de gestión de riesgos sin matriz ISO
+14971:2019 ni FMEA.
+FALTANTE TOTAL
+El paquete Dropbox Oct-2026 no
+incluye ningún informe ni matriz
+de Gestión de Riesgos.
+7
+No remite Informe de Evaluación Clínica válido (Art. 126°
+num. 9) con alcance, plan, identificación, valoración y
+análisis.
+Se cargó el CER del Ureteral Catheter
+( ACE/CES/UC ) de 70–90 cm con
+afirmación falsa de "0 componentes".
+INVÁLIDO
+Nuevo CER ACE/CES/DJS-02
+llega totalmente sin firmas, con
+error "Bottle/grenade type" y
+rango 3–8 Fr / 8–30 cm.
+8.1 – 9.2
+Manual IFU repite variantes Multiloop, indica 1 día de
+vida útil, muestra símbolo REF sin códigos; Rotulado
+omite nombre de fabricante (Art. 138° "m") y usa
+rangos.
+Edición deficiente de manual y
+etiquetas sin asignar catálogo único
+por presentación/combinación.
+FALTANTE TOTAL
+Ni el nuevo IFU ni los nuevos
+rotulados mediato/inmediato
+vienen en el paquete Oct-2026.
+
+
+=== PAGINA 5 ===
+AUDITORÍA REGULATORIA DIGEMID · URETERAL STENT / CATÉTERES DOBLE J
+APORTE MÉDICO PERÚ S.A.C. (RUC 20610321268)
+Página 5 de 14
+Documento Técnico-Regulatorio Confidencial · Emitido: 11/11/2026
+3
+ Riesgos Sancionatorios Críticos: Adulteración, Droguería, BPA y Stock
+3.1 ALERTA MÁXIMA — Evidencia Documentada de Manipulación y Adulteración de Informes Oficiales
+Durante la auditoría de los correos electrónicos y archivos adjuntos históricos se comprobaron tres líneas de riesgo sancionatorio
+extremo tipificadas bajo el Art. 34° del TUO de la Ley N° 27444, el Reglamento de Establecimientos y Dispositivos Médicos (D.S. 016-
+2011-SA / Ley 29459) y los Arts. 411° y 427° del Código Penal:
+1. Propuesta explícita de falsificar fechas y alterar documentos ya firmados (Soul Quality):
+En el correo del 19/12/2025, Soul Quality admite haber ejecutado "ediciones que se realizó a un 100% de los documentos
+recepcionados" para ingresar el Exp. 25157794.
+En el correo del 01/06/2026 tras la denegatoria, solicitan expresamente que los informes de biocompatibilidad sean remitidos
+"con fechas más actuales y en formatos editables".
+En el correo del 03/07/2026 (09:52 h), gestion@soulquality.pe escribe textualmente:
+"2. Pruebas de Biocompatibilidad: Son editables los documentos, realizaríamos la actualización de fecha por lo que quedan CONFORMES.
+[ARL/G/22/PT0287 27/07/2022; PT0288 05/07/2022; PT0289 06/06/2022]."
+"3. Lista de Principios Esenciales: Doc. N° ACE/TF/GSPR/US-01: Las ISOS 10993-12, ISO 10993-18 no es necesario que lo mencionen... En
+este sentido lo retiramos del documento ya que cuenta con firmas y sello correspondiente."
+Alterar las fechas de finalización de un ensayo GLP emitido por un laboratorio acreditado (Accuprec) o mutilar un documento ya
+suscrito por QA de ACE Medical constituye adulteración documental. Durante el control posterior, DIGEMID puede oficiar al
+laboratorio indio o detectar diferencias de metadatos/firmas y decretar la nulidad del RS + multa + denuncia ante la Procuraduría
+Pública del MINSA.
+Incluso en la subsanación de mayo 2026, los anexos revisados muestran archivos Word ( In_vitro_Citotoxici...docx ,
+Sensibilizacion_C...docx , Reactividad_Intra...docx ) y un PDF de Accuprec con firma borrosa y artefactos de pegado
+digital.
+2. Informe de laboratorio chino suplantado bajo membrete y sello de ACE Medical ( Z20171753 ): En los archivos históricos
+cateter_Test_Report_AceMedical.pdf (pp. 1–22) y cateter_Informes_y_analisis_pruebas_AceMedical.pdf (pp. 1–18), figura el
+informe N° Z20171753 (abril–mayo 2017, > 9 años de antigüedad) emitido por Zhejiang Institute of Medical Device Supervision and
+Testing ( SYXK(zhe) 2016-0014 , con referencias a fabricantes chinos Shandong Qidu Pharmaceutical y Beijing Shahe Tongli, norma
+GB/T 27025 ). Dicho informe no identifica nombre de producto, modelo ni lote, tiene el logotipo de ACE MEDICAL DEVICES PVT.
+LTD. superpuesto en el encabezado, lleva el sello For Ace Medical Devices Pvt Ltd - Mr. Vikas Sethi estampado sobre la línea
+Personnel: (pp. 2, 12, 20) y posee las páginas 4 y 7 completamente espejadas al revés. Su uso actual garantiza descalificación
+inmediata por sospecha de fraude técnico.
+3. Exposición personal directa del Gerente General: La Declaración Jurada que acompaña cada trámite en VUCE la firman Juan
+Sebastián Macías Duque (C.E. 005538355) y el Director Técnico, asumiendo responsabilidad legal directa sobre la autenticidad de
+cada archivo adjunto (tal como consta en el modelo de DJ de UROCLAMP ). Ningún contrato privado con una consultora exime al
+Representante Legal ante DIGEMID o la Fiscalía.
+3.2 Crisis Administrativa de la Droguería, Certificación BPA, Horarios y Dirección Técnica
+Paralelamente al problema técnico del producto, la Droguería Aporte Médico Perú S.A.C. (Código EF 0110592) atraviesa una
+situación crítica ante la Dirección de Inspección y Certificación (DICER) de DIGEMID:
+Frente Operativo
+Situación Verificada y Evidencia Documental
+Consecuencia / Riesgo Normativo
+Apercibimiento BPA y
+Horario
+Exp. 26-037851-1
+(Carta 11725-2026)
+El 18–19/09/2026 DICER emitió la Carta N° 11725-2026 advirtiendo
+que el horario declarado de la droguería es incompatible con las
+acciones de control sanitario y ordenó adecuarlo en 10 días hábiles al
+Comunicado N° 012-2026-DIGEMID (25/08/2026) bajo
+apercibimiento de improcedencia o denegatoria de la certificación
+BPA. Adicionalmente, la dirección oficial de Carta 11725 arrastra el
+error tipográfico ". INT.3C, MZ. G, LOTE.23 Urb. UMAMARCA" .
+CRÍTICO
+Sin Certificación BPA propia o encargo válido
+vigente, la droguería no puede importar ni
+liberar nuevos Registros Sanitarios Clase III.
+Rechazo Solicitud 584107
+y Horario 6 h/semana
+Exp. 26131536-1
+Tras renunciar la DT Cinthia Chumacero ( Exp. 26129463-1 , pres.
+02/10/2026, reg. 05/10/2026), el 07/10/2026 Soul Quality presentó la
+Sol. 584107 marcando solo Cambio de horario del EF sin marcar
+Cambio de horario del Q.F. y dejando el Bloque 8 (DT) en blanco. Fue
+observada el mismo día (11:45 h) y subsanada (15:15 h) como Exp.
+26131536-1 declarando apenas 6 horas/semana (Miércoles y Viernes
+08:00–11:00).
+INCUMPLIMIENTO COMUNICADO 012
+3 horas/día y solo 2 días/semana incumple el
+mínimo de permanencia (≥ 4 h/día) y la
+cobertura horaria compatible con DIGEMID
+(L–V 08:00–17:00).
+
+
+=== PAGINA 6 ===
+AUDITORÍA REGULATORIA DIGEMID · URETERAL STENT / CATÉTERES DOBLE J
+APORTE MÉDICO PERÚ S.A.C. (RUC 20610321268)
+Página 6 de 14
+Documento Técnico-Regulatorio Confidencial · Emitido: 11/11/2026
+Frente Operativo
+Situación Verificada y Evidencia Documental
+Consecuencia / Riesgo Normativo
+Nuevo DT con Datos
+Corporativos de Soul
+Quality
+Exp. 26131801-1
+El 07–09/10/2026 (Sol. 584400 → Exp. 26131801-1) se comunicó el
+asume del Q.F. Jordan Alexander Fernandez Salazar (CQFP 31768,
+DNI 74368441) con horario Mié y Vie 08:00–11:00, consignando
+como email del profesional grupo.soulquality@gmail.com y
+teléfono 929286974 .
+ALTA SOSPECHA INSPECTIVA
+El teléfono 929286974 pertenece a Cinthia
+Chumacero / Evana Chavez / Lizeth Rojas (y
+aparece hasta en firma de correos de Juan
+Macías). Si un inspector llama o visita y no
+halla presencia real, procede sanción (D.S.
+014-2011-SA).
+Conflicto de Roles y BPA
+Vencido en Alegroup
+EF 0111920
+El Certificado BPA N° 1132-2023 de Alegroup Perú S.A.C. (15–25 °C,
+Acta 753-I-2023) fue emitido el 03/07/2023 por 3 años, por lo que
+VENCÍO EL 03/07/2026. Asimismo, en el directorio de Alegroup del
+13/08/2025 figuraban Q.F. Cinthia Chumacero como Gerente de
+Operaciones y Q.F. Evana Chavez como Directora Técnica de
+Alegroup (usando también 929286974 ), mientras operaban Soul
+Quality. El antecedente de cierre temporal R.D. 1881-2023
+(29/05/2023) agrava cualquier reincidencia.
+ALTO RIESGO OPERATIVO
+Se requiere copia del BPA renovado vigente
+de Alegroup (posterior al 03/07/2026) y
+verificación de que el contrato de
+almacenamiento tercerizado esté activo y sin
+conflicto ante DICER.
+Stock Inmovilizado y
+Antecedentes Aduaneros
+/ Portafolio
+En Área de Bajas de Alegroup permanecen desde 24/09/2024 91
+unidades de Ureteral Stent Set con DM17365E vencido (21 und 6Fr
+24cm; 70 und 4.7Fr 24cm). Además existe precedente de
+inmovilización aduanera (Acta N° 000445 del 15/06/2023) y
+denegatoria previa de Cinta Vaginal ( Exp. 24-010523-1 , R.D.
+7456). Incluso el dossier aprobado de Uroclamp (R.D. 5049-2024)
+contenía un error de pegado en Principios Esenciales 3.1: "cinta de
+incontinencia urinaria femenina".
+CONTROL POSTERIOR
+Evidencia falla sistémica de revisión
+documental en la consultoría contratada;
+prohibición absoluta de movilizar las 91
+unidades fuera de Bajas.
+
+
+=== PAGINA 7 ===
+AUDITORÍA REGULATORIA DIGEMID · URETERAL STENT / CATÉTERES DOBLE J
+APORTE MÉDICO PERÚ S.A.C. (RUC 20610321268)
+Página 7 de 14
+Documento Técnico-Regulatorio Confidencial · Emitido: 11/11/2026
+4
+ Auditoría Documento por Documento — Paquete ACE Medical (Octubre 2026)
+Los ocho (8) documentos entregados por ACE Medical el 21/10/2026 vía Dropbox (y remitidos por Paula Victoria el 07/11/2026) fueron
+inspeccionados íntegramente a nivel de texto, metadatos PDF, tablas, sellos, firmas y referencias técnicas. Ninguno aprueba los filtros
+de DIGEMID en su estado actual:
+Documento y
+Metadatos
+Nivel de Riesgo
+Lista Exhaustiva de Errores, Contradicciones, Sellos y Omisiones Detectadas
+1. GSPR Checklist
+2. GSPR Checklist
+ACE US.pdf
+Doc:
+ACE/TF/GSPR/DJ-
+01
+Fecha: 23/01/2025
+62 páginas
+ALTO
+Marco legal errado: Redactado bajo el Anexo I del EU MDR 2017/745, sin
+tabla de mapeo al Anexo I del D.S. N° 003-2020-SA peruano ni referencia a
+ACE/TF/GSPR/US-01 .
+Error grave de copy-paste gastrointestinal (p. 37, ítem 18.8): Afirma
+literalmente que el IFU advierte: "This product is intended for use by physicians
+trained & experienced in Gastro-enterological Endoscopic procedures"
+(plantilla copiada de stent biliar/gastrointestinal en un stent urológico).
+Respuestas absurdas copiadas en columna Applicability (p. 26–27): Ítem
+14.2 e) (accidental ingress of substances) e ítem 14.2 g) (aging of
+materials / implants) responden: "NO Device does not need any software
+support" (error de copia de 14.2 d ).
+Contradicciones internas sobre implantabilidad y procesos: Ítem 10.1 d)
+marca NO a "impact of processes on material properties" pese a esterilizar
+poliuretano con óxido de etileno; ítem 10.1 c) marca NO mientras 23.4
+v) marca YES a "implantable devices"; ítem 23.2 i) marca NO a fecha de
+expiración en etiqueta cuando 23.3 i) dice Yes; ítem 23.3 e) marca NO
+a incluir descripción en el empaque estéril; ítem 10.1 h) cita ISO 10993-
+18 (reporte inexistente).
+Ftalatos / CMR negados sin respaldo (pp. 10–15, 48): En 10.4.1–10.4.5
+y 23.2 f) asegura que el producto no contiene ftalatos/CMR ni liberará
+sustancias, pero no adjunta estudio analítico químico y contradice su propio
+IFU aprobado de 2019 que advertía daños reproductivos por ftalatos.
+Celdas en blanco y formato (p. 62): Los últimos tres sub-ítems de 23.4 —
+(y) notificación de incidentes, (aa) tarjeta/información del implante Art.
+18 y (ab) sistemas programables— quedan con sus tres columnas de
+cumplimiento completamente en blanco. Firma de Snehal Shirude y Anuja
+Khidse solo en p. 1 (sin sello de empresa ni cierre firmado en p. 62).
+2. Clinical Evaluation
+Report (CER)
+ACE US_ CE
+Summary
+report.pdf
+Doc: ACE/CES/DJS-
+02
+Fecha Doc:
+17/08/2025
+PDF creado:
+17/10/2026
+25 páginas
+CRÍTICO / INVÁLIDO
+CERO FIRMAS NI SELLOS: No tiene nombre, firma, fecha, ni sello de autor,
+revisor, aprobador ni médico evaluador clínico en ninguna de las 25 páginas
+(p. 20 remite un "Annexure 3" con el perfil del evaluador que no existe ni fue
+adjuntado).
+Clasificación incorrecta (p. 4): Declara "Class IIa & Class IIb device" bajo
+directiva derogada MDD 93/42/EEC / 2007/47/EC (no Clase III ni MDR).
+Contradicción sobre componentes (p. 4 vs p. 10): En p. 4 dice "DJS Catheter
+doesn't contain any components including software and accessories"
+(exactamente lo que DIGEMID observó en 1.1/1.3 de la Notif. 2026068505),
+mientras p. 10–12 y el título hablan de "and SET", accesorios, guía, Nitinol
+hidrofílico, etc.
+Rango dimensional incompatible (pp. 10–12): Limita el producto a 3–8 Fr y
+8–30 cm, dejando fuera los calibres 2, 2.5, 9–12 Fr y longitudes 6, 7, 32 cm del
+FSC y del proyecto de registro.
+Errores groseros de plantilla y redacción: En p. 17 (Inclusion criteria D1)
+dice literalmente: "Similar device design: Bottle/grenade type." (¡diseño
+tipo botella/granada copiado de otro dispositivo!). En p. 15 dice "Review of full
+Test by 16 Reviewer"; en p. 11 corta palabra "orifices" en "ifi"; numera secciones
+repetidas 1.1, 1.2, 1.3, 1.4, 3, 4, 5, 6 de forma desordenada.
+Anexos faltantes y experiencia clínica sin sustento (p. 22): Promete "PMS
+report is attached for your reference as [vacío]" y "STAGE 3: Actual Clinical
+Investigation report attached" (ninguno adjunto). Cita un seguimiento de
+"Thirty patient's surgical tracker" sin protocolo, hospital, fecha, país ni datos
+verificables.
+
+
+=== PAGINA 8 ===
+AUDITORÍA REGULATORIA DIGEMID · URETERAL STENT / CATÉTERES DOBLE J
+APORTE MÉDICO PERÚ S.A.C. (RUC 20610321268)
+Página 8 de 14
+Documento Técnico-Regulatorio Confidencial · Emitido: 11/11/2026
+Documento y
+Metadatos
+Nivel de Riesgo
+Lista Exhaustiva de Errores, Contradicciones, Sellos y Omisiones Detectadas
+3. ETO Sterilization
+Validation
+ACE US_
+Sterilization
+Validation.pdf
+Doc: ACE/SVR/DJ-
+02
+Fecha: 11/08/2026
+PDF creado:
+17/10/2026
+10 páginas
+CRÍTICO / RECHAZO
+Error científico en SAL (p. 10): En Conclusión 8.0 redacta "Sterility Assurance
+level (SAL of 106)" (exponente positivo, un millón en lugar de 10-6 ;
+igualmente en p. 8 escribe 106 sin superíndice para el BI). En p. 2 y p. 9 sí
+pone 10-6 .
+Contradicción numérica de ciclos dentro del mismo informe: En p. 2 (Sec.
+1.0) afirma que se ejecutaron "2 half cycles, 3 full cycles and 1 fractional
+cycle", mientras que en p. 3 (Sec. 4.0) y Tabla 1 (p. 4) reporta "Three half
+cycles, three full cycles, one fractional cycle".
+Errores de normas y redacción (p. 3): Cita la norma inexistente ISO
+111737 (error por ISO 11737-1 ) e invoca la ley doméstica india Drugs &
+Cosmetics Act, 1940 para monitoreo ambiental.
+Cero datos reales ni trazabilidad de validación: Todas las tablas 1–4 llenan
+cada variable exclusivamente con la palabra "Complies" , sin fechas de
+corrida, N° de lote del stent/set, ID/capacidad de la cámara de EO,
+marca/lote/cepa/D-value del indicador biológico, ni conteo real de
+bioburden (Sec. 6.0 no adjunta los reportes de tendencia). No describe equipo
+esterilizador ni si se esterilizó el Set completo (empujador, guía, clamp, pouch).
+Residuales de EO sin evidencia (p. 9, Sec. 7.0): Declara aireación de apenas
+60 minutos y afirma haber enviado muestras a un "approved NABL accredited
+laboratory" obteniendo resultados conformes a ISO 10993-7, pero no adjunta
+el informe NABL, ni indica nombre de laboratorio, N° de reporte, lote
+analizado ni cifras en mg/dispositivo de EO y ECH.
+Aprobación incompleta (p. 10): Firmas de Snehal Shirude y Anuja Khidse
+insertadas como imagen sin fecha y sin sello circular del fabricante.
+4. Design
+Verification Report
+4. Design
+Verification
+Report _ACE
+Ureteral
+stent.pdf
+PDF creado:
+17/10/2026
+3 páginas
+CRÍTICO / RECHAZO
+Es un listado de requisitos teóricos, NO un informe de resultados: Carece
+de código de documento, versión, fecha de emisión, lotes ensayados y
+resultados cuantitativos observados (columnas solo tienen Requirement,
+Procedure, Expected; nunca Actual Result / Pass-Fail / Report Ref.).
+Rango dimensional incompatible (DRS-07, p. 1): Declara "3-8 Fr diameter
+& 8-30 cm length" (contradice 2–12 Fr / 6–32 cm y el 3–8 Fr / 06–32 cm del
+2019).
+Resistencia mecánica y normas incompletas (DRS-15/16, p. 2): Pide ≥ 15 N
+para silicona/multiloop/long-life y ≥ 5 N para los demás (sin especificar norma
+BS EN ISO 20697 ni adjuntar curvas reales de tracción). En DRS-16 cita ISO
+10993-1, -5, -7, -10 pero omite -11 (pirogenicidad/sistémica) y -23
+(irritación).
+Contradicción de vida útil y permanencia (DRS-22 y DRS-23, p. 3): Fija
+vida útil en 3 años (contra 5 años impresos en los lotes de Accuprec) y
+permanencia (Life time) en 30–90 días refiriendo un "Life time Study Report"
+inexistente, lo cual clasifica el dispositivo como exposición
+prolongada/permanente (> 30 días).
+Firmas deficientes (p. 3): Solo iniciales recortadas en imagen sin nombres
+completos impresos, sin fechas y sin sello empresarial.
+5. Technical Report
+Technical
+Report_ACE US.pdf
+PDF creado:
+17/10/2026
+2 páginas
+CRÍTICO / INSUFICIENTE
+Documento sin valor regulatorio formal: Es una ficha comercial genérica de
+2 páginas sin código de documento, sin revisión, sin fecha, sin firma de
+responsable, sin sello de ACE Medical y sin dirección de la planta fabricante.
+Incumple por completo el Art. 130° D.S. 016-2011-SA: No identifica
+códigos/modelos (OED, CED, Multiloop), no especifica calibres Fr ni
+longitudes, no detalla componentes del Set, no consigna materias primas con
+porcentajes cuantitativos (ni radiopacificantes ni ftalatos), no declara vida útil
+ni tiempo máximo de permanencia, no especifica método/criterio analítico de
+control ni incluye el flujograma con descripción de etapas (Art. 130°.5).
+Errores menores (p. 2): Escribe "Silicon stents" (silicio en lugar de Silicone) y
+utiliza acento en español "blíster" dentro de un texto en inglés.
+
+
+=== PAGINA 9 ===
+AUDITORÍA REGULATORIA DIGEMID · URETERAL STENT / CATÉTERES DOBLE J
+APORTE MÉDICO PERÚ S.A.C. (RUC 20610321268)
+Página 9 de 14
+Documento Técnico-Regulatorio Confidencial · Emitido: 11/11/2026
+Documento y
+Metadatos
+Nivel de Riesgo
+Lista Exhaustiva de Errores, Contradicciones, Sellos y Omisiones Detectadas
+6, 7 y 8.
+Biocompatibilidad
+Accuprec (3
+archivos)
+Cytotoxicity
+test.pdf ( PT0287 ,
+27/07/2022, 30p)
+Intracutaneous
+test.pdf ( PT0289 ,
+06/06/2022, 38p)
+Pyrogencity.pdf
+( PT0290 ,
+14/06/2022, 31p)
+PDF modDate:
+14/07/2025
+CRÍTICO / VENCIDO E INCOMPLETO
+Muestras evaluadas con lotes VENCIDOS (09/2021 – 08/2026): Los tres
+estudios analizaron los lotes SBA00921004 (Short Term), SBA00921005 y
+SBA00921006 fabricados en septiembre 2021 y vencidos en agosto 2026.
+Además demuestran una vida útil real de 60 meses (5 años), contradiciendo
+los 3 años declarados por ACE en DRS-22 .
+Error grave en nombre del producto ( PT0289 pp. 1, 14): El título oficial del
+estudio y la tabla de muestra dicen "Double I Catheter & Kit" en lugar de
+"Double J" (en p. 14 los lotes 004 y 005 dicen Double I y solo el 006 dice
+Double J).
+Contradicción clasificatoria autodestructiva ( PT0289 p. 14 y PT0290 p.
+14): En el mismo cuadro declaran "MDR 2017/745: Class IIa Rule 5" y justo
+debajo, bajo ISO 10993-1:2018: "Nature of Contact Duration: Permanent
+Exposure (> 30 days) / Implant Device: Tissue".
+Batería de ensayos INCOMPLETA frente a ISO 10993-1 para > 30 días: (a)
+Falta el informe de Sensibilización Cutánea ARL/G/22/PT0288 (ISO 10993-
+10) en la carpeta Oct-2026; (b) Para exposición permanente/prolongada > 30
+días (y 30–90 días del DRS-23), ISO 10993-1 exige además Toxicidad
+Sistémica Aguda, Subaguda/Subcrónica (ISO 10993-11), Genotoxicidad
+(ISO 10993-3), Implantación (ISO 10993-6) y Caracterización Química /
+E&L (ISO 10993-18 / -17), todos ausentes.
+Componentes atípicos y sellos/edición (p. 13–14 y últimas pp.): Declaran
+"Kit Contain: ... Umbilical cord clamp, Thread Sheath" (abrazadera de cordón
+umbilical en un set urológico). Todos los PDFs fueron re-procesados el
+14/07/2025 (3-Heights PDF Merge Split Shell), tienen el sello de ACE
+estampado sobre cada hoja del laboratorio, artefactos OCR (ZSO 9001:2015) y
+omisión del sello de Accuprec en la hoja de firmas final (p. 38) de PT0289 .
+Además la carpeta tiene error ortográfico Biocompatability y
+Pyrogencity .
+
+
+=== PAGINA 10 ===
+AUDITORÍA REGULATORIA DIGEMID · URETERAL STENT / CATÉTERES DOBLE J
+APORTE MÉDICO PERÚ S.A.C. (RUC 20610321268)
+Página 10 de 14
+Documento Técnico-Regulatorio Confidencial · Emitido: 11/11/2026
+5
+ Auditoría de Defectos en Documentación Histórica (No Reciclar)
+Los archivos históricos alojados en Google Drive y correos anteriores no deben reutilizarse sin corrección o sustitución íntegra. A
+continuación se detallan los defectos mínimos y mayores detectados:
+Certificados Regulatorios, Cartas y Rotulados Antiguos
+cateter_CVL (20/04/2022): Vigencia 1 año (expirado
+20/04/2023), apostillado/legalizado ante el Consulado de
+Colombia ( AFWKG02555694 ) y no Perú; sello DGFT borroso.
+CLV 30/10/2024 (Exp. 25039778): Sello DGFT Pune
+borroso e ilegible que motivó rechazo; incluye Item 02
+Ureteral Catheter (70–90 cm) e Item 15 DJS Stent (2–12 Fr,
+6–32 cm) sin listado de códigos individuales ni licencia
+médica India CDSCO.
+Autorización Colombia (02_AUT_COL): Autoriza solo a
+Aporte Médico S.A.S. para Colombia; doble fecha
+contradictoria ( 26/09/2019 arriba y 26/11/2019 en firma);
+dirección 401A; firmada por Asistente Comercial.
+Detalle Exportación (03_DET_EXP): Typo "Columbia" ,
+firma de Vikas Sethi sin fecha y sello incompleto.
+Respuesta DIGEMID (05/06/2023): Escrito de Aporte
+Médico Colombia con pie uroclamp.com , cita inexistente
+"Decreto 4725 de 20025" y typo "sin caducidad : :".
+Rotulados Mediato e Inmediato (16/17): Siguen
+declarando importador Consorcio Teleandes S.A.C. (RUC
+20537638631), dirección vieja E-1/7 Neptune Society ,
+texto íntegro en inglés, error "on the òrder" , símbolo
+incorrecto de no reesterilizar ( 2 tachado por código en
+vez del pictograma normalizado), rango sin SKU y ausencia
+de datos de Aporte Médico Perú S.A.C.
+Estudios Técnicos, Estabilidad, Riesgos e IFU Antiguos
+Contaminación con Catéter Foley 2012 (08_IFU pp. 13–
+24 y 10_DOCS_TEC): Se mezcló el documento ACEDT2543
+(08/12/2012, Roy Seth / Vikram Naipaul / Aiyar Seth) con
+tabla de catéter balón Foley (8Fr–28Fr, Balloon 3–50 ml,
+Funnel 9.5 cm) y QP/009-00 con tracción contradictoria
+( >15 N vs >95 N ).
+Tres tiempos de permanencia en IFU (08_IFU pp. 1–12):
+El mismo manual declara 25 días (p. 2/8), 6 meses (p. 3/7)
+y 90 días (Long Life). Deja en blanco "Artwork code with
+Rev. No." y usa traducción automática ("no debe
+mantenerse mora", "El doble coleta", "de la vegiga").
+Estabilidad 2016 obsoleta (06_ELIM_DM): Reporte
+Aavanira Biotech AB/ACE/02/2015-16/1123 (> 10 años, lote
+BAOD-2636-04-16 vencido en marzo 2019); solo acelerada
+3 meses a 60 °C (sin tiempo real ni ISO 11607); p. 1
+corrupta con espejo al pie y p. 25 recorte tachando LATEX ;
+traducción rota ("pelar las juntas", "sacudidas de calor",
+"taction").
+Validación EO 2018 (10_DOCS_TEC pp. 34–45, SV/COM-
+00 ): Página 35 espejada al revés, Bacilus atrophaeus mal
+escrito y error microbiológico crítico "positive sterility test
+on 3 half cycles".
+Evaluación de Riesgos (04/05/09/15): Normas
+derogadas ( MDD , ISO 14971:2012 , EN 980:2008 ),
+dirección vieja E-1/7 , permanencia < 25 días , firmas en
+blanco, traducción "el gato No." (Cat. No.) y "por el
+tubo" .
+Inconsistencias de Materias Primas y Tamaños
+(13_REP_TEC vs 17_1 vs CER): 13_REP_TEC menciona
+Nitinol y HDPE; 17_1 cita Material compuesto, ABS
+blanco/Poliestireno y LDPE; ninguno fija % ni aclara BaSO4 /
+carbonato de bismuto.
+
+
+=== PAGINA 11 ===
+AUDITORÍA REGULATORIA DIGEMID · URETERAL STENT / CATÉTERES DOBLE J
+APORTE MÉDICO PERÚ S.A.C. (RUC 20610321268)
+Página 11 de 14
+Documento Técnico-Regulatorio Confidencial · Emitido: 11/11/2026
+6
+ Requerimiento Técnico-Legal Obligatorio a ACE Medical Devices Pvt. Ltd.
+Antes de solicitar ningún documento nuevo a India, Aporte Médico Perú S.A.C. debe definir por escrito con ACE Medical tres
+definiciones estratégicas inamovibles: (1) qué códigos exactos comercializará en Perú (ej. 3–8 Fr / 06–32 cm o 2–12 Fr / 06–32 cm y
+variantes de punta/loop/Set); (2) cuál es la vida útil única sustentada con estudio (36 o 60 meses); y (3) cuál es el tiempo máximo de
+permanencia clínica real (indwelling time): si declaran ≤ 30 días o si declaran 30–90 días / > 30 días (lo que obliga al fabricante
+a entregar estudios ISO 10993 completos de largo plazo). Una vez fijado ese maestro único, se debe exigir a ACE el paquete íntegro
+detallado en la siguiente tabla:
+N°
+Documento Exigido
+Especificaciones Obligatorias y Correcciones Exactas
+Formalidad, Firma y
+Legalización
+1
+CLV / Free Sale Certificate
+(CDSCO / Autoridad
+Competente)
+Emitido por la Autoridad Sanitaria Competente de India (CDSCO bajo MDR
+2017; evitar DGFT o, si aplica DGFT, exigir sello húmedo nítido + verificación
+consular/apostilla). Debe incluir exclusivamente Ureteral (D.J.) Stent /
+Catheter and Set (Ítem 15) — sin mezclar Ureteral Catheter (Ítem 02) —
+con listado anexo de códigos SKU, calibres Fr, longitudes en cm y
+componentes del Set idénticos al proyecto peruano.
+Vigencia ≤ 2 años (y no vencido
+si indica 1 año). Sello legible +
+Apostilla de La Haya (o
+Consulado de Perú) + traducción
+técnica.
+2
+Licencia de Fabricación /
+BPM (CDSCO Form MD-5
+/ MD-9) + ISO
+13485:2016
+Licencia de manufactura médica vigente bajo India Medical Devices Rules
+2017 emitida por SLA/CLA (Form MD-5 para Clase B o MD-9 para Clase C)
+acreditando cumplimiento de Buenas Prácticas de Manufactura (Quinto
+Anexo MDR 2017 / WHO-GMP oficial, no entidades privadas no
+reconocidas) + Certificado ISO 13485:2016 vigente que cubra el alcance
+Ureteral Stent / Double J Stent y planta 401A, Gera 77, Kalyani Nagar,
+Pune .
+Copia vigente con Apostilla /
+Consulado Perú según requiera
+VUCE (BPM requiere apostilla si
+no lo emite organismo
+reconocido).
+3
+Carta de Fabricante /
+Autorización y Maestro
+de Códigos
+Dirigida a DIGEMID y a APORTE MÉDICO PERÚ S.A.C. (RUC
+20610321268). Debe declarar explícitamente la clasificación de riesgo
+aplicable, marca comercial (o sin marca), tabla maestra con cada código
+SKU, modelo, diámetro (Fr), longitud (cm), punta, material (PU /
+Silicona / Long-life) y desglose exacto de componentes del Set (p. ej.
+Stent, Pusher, Guía PTFE/Nitinol, Sutura, Clamp — aclarando por qué no es
+umbilical), además de su autorización como titular/distribuidor en Perú.
+Papel membretado actual (401A
+Gera 77), firma autorizada con
+nombre/cargo/fecha + sello
+nítido.
+4
+Informe Técnico
+Completo (Art. 130° D.S.
+016-2011-SA)
+Sustituir el PDF comercial de 2 pp. por Informe Técnico regulatorio firmado
+que incluya: descripción clínica, uso previsto, indicación exacta de
+permanencia (días), composición cuali-cuantitativa (%) de todos los
+materiales (incluidos BaSO4 / Bismuto, pigmentos y % de ftalatos),
+especificaciones por modelo/componente, vida útil validada única,
+presentaciones (mediato/inmediato) y el flujograma de manufactura con
+descripción resumida etapa por etapa hasta la liberación del producto
+estéril (Art. 130°.5).
+Código de documento, fecha
+vigente, firmas con nombre,
+cargo y sello nítido en cierre.
+5
+Declaración de
+Conformidad (DoC) +
+Principios Esenciales (D.S.
+003-2020-SA)
+(a) Nueva DoC declarando clasificación coherente (o nota regulatoria
+explicando Clase IIb/III EU MDR vs Clase III Perú, eliminando toda mención a
+"Clase IIa Regla 5"). (b) Nuevo GSPR Checklist libre de errores GI ("Gastro-
+enterological"), sin filas vacías en p. 62, con referencias exactas a los códigos
+de los reportes adjuntos (incl. ACE/SVR/DJ-02 , estudios de diseño,
+biocompatibilidad y riesgo) y homologado / mapeado punto por punto al
+Anexo I del D.S. 003-2020-SA.
+Código de control, fecha y firma
+QA/RA + sello legible de ACE
+Medical.
+6
+Verificación y Validación
+de Diseño (Resultados
+Reales)
+Entregar el Informe de Ejecución con resultados numéricos reales
+medidos (no solo matriz de requisitos), indicando lotes probados, tamaño
+muestral, normas aplicadas (ISO 20697 / ASTM), valores de tracción reales
+(≥ 15 N / ≥ 5 N), flujo, radiopacidad, migración y dimensiones exactas
+alineadas al maestro de códigos.
+Código de doc., lotes vigentes,
+mediciones reales, fechas,
+nombre completo y firmas +
+sello.
+7
+Biocompatibilidad ISO
+10993 (Lotes Vigentes y
+Batería Completa)
+(a) Entregar el informe faltante Sensibilización Cutánea
+ARL/G/22/PT0288 ; (b) Corregir formalmente con fe de erratas / emisión
+del laboratorio el error "Double I Catheter" y "Umbilical cord clamp" en
+PT0289 y la clasificación Class IIa Rule 5 vs Permanent Exposure (> 30 días);
+(c) Ejecutar ensayos vigentes sobre lotes no vencidos y cubrir TODOS los
+endpoints ISO 10993-1 según permanencia real: si excede 30 días (30–90 d),
+aportar Toxicidad Sistémica Aguda y Subcrónica (10993-11),
+Genotoxicidad (10993-3), Implantación (10993-6) y Caracterización
+Química E&L (10993-18 / 10993-17), o bien justificación técnica
+documentada bajo ISO 10993-1 por equivalencia de material/proceso
+verificada.
+Informes originales de
+laboratorio NABL/GLP intactos
+(sin re-etiquetado de ACE
+tapando al lab, sin edición en
+Word, con sellos completos del
+laboratorio).
+
+
+=== PAGINA 12 ===
+AUDITORÍA REGULATORIA DIGEMID · URETERAL STENT / CATÉTERES DOBLE J
+APORTE MÉDICO PERÚ S.A.C. (RUC 20610321268)
+Página 12 de 14
+Documento Técnico-Regulatorio Confidencial · Emitido: 11/11/2026
+N°
+Documento Exigido
+Especificaciones Obligatorias y Correcciones Exactas
+Formalidad, Firma y
+Legalización
+8
+Estudio Analítico de
+Ftalatos / Sustancias CMR
+(ECHA SVHC / REACH)
+Emitir Test Report químico de laboratorio acreditado (ISO 17025 / NABL
+/ TÜV / SGS) evaluando presencia y porcentaje p/p de ftalatos (DEHP, DBP,
+BBP, DIBP, etc.) y sustancias SVHC en el stent ACE y sus componentes,
+demostrando < 0.1% o ausencia, para cerrar definitivamente la observación
+DIGEMID 1.7 (en consonancia con GSPR 10.4). Si existieran trazas, adjuntar
+evaluación riesgo-beneficio y advertencia acorde al IFU.
+Informe analítico original de
+laboratorio acreditado sobre
+producto acabado ACE.
+9
+Validación de
+Esterilización EO +
+Reporte NABL ISO 10993-
+7
+Corregir ACE/SVR/DJ-02 : unificar número de semiciclos (2 vs 3), corregir
+SAL 10-6 en p. 10, corregir typo ISO 11737-1 , incorporar datos crudos
+reales de las corridas (fechas, lotes, equipo/cámara, marca, lote, cepa y
+D-value del indicador biológico, bioburden), sustentar tiempo de
+aireación (60 min parece insuficiente sin dato analítico) y ADJUNTAR el Test
+Report del laboratorio NABL acreditado con valores numéricos de
+residuos de EO y ECH bajo ISO 10993-7.
+Informe firmado con fecha +
+Anexo obligatorio de reporte
+NABL ISO 10993-7 original.
+10
+Estabilidad (Tiempo Real
+/ Acelerado) y Validación
+de Empaque ISO 11607
+Reemplazar el estudio obsoleto de 2016 (vencido 03/2019) por un Estudio
+de Estabilidad completo (Acelerado ASTM F1980 + Tiempo Real) y
+Validación de Empaque (ISO 11607-1/-2 + Transporte ASTM D4169)
+que sustente de manera unívoca la vida útil declarada (36 o 60 meses) sobre
+el pouch Tyvek / blíster actual.
+Emitido por laboratorio
+acreditado / QA con lote trazable,
+curva de envejecimiento y
+pruebas de sello estéril.
+11
+Gestión de Riesgos (ISO
+14971:2019)
+Redactar y remitir el Plan e Informe Completo de Gestión de Riesgos +
+Matriz FMEA bajo ISO 14971:2019 (no 2012), con escalas definidas de
+Severidad y Probabilidad, aceptabilidad de riesgo residual global y
+trazabilidad literal de las medidas de control hacia el IFU (incluyendo
+advertencia sobre supervisión en procedimientos intervencionistas y
+duración máxima).
+Documento completo, código
+vigente, fecha, firma QA/RA y
+sello de ACE Medical.
+12
+Informe de Evaluación
+Clínica (CER) Completo y
+Firmado
+Corregir ACE/CES/DJS-02 : eliminar el error "Bottle/grenade type", eliminar
+"doesn't contain any components" si es Set, unificar rango Fr/cm, actualizar al
+marco normativo actual, anexar reporte PMS, justificación clínica de
+equivalencia y los 30 casos clínicos con datos trazables. Incorporar cuadro
+de firmas (Autor, Revisor Clínico/Médico con CV en Anexo 3 y
+Aprobador) debidamente fechado y sellado.
+Firmado y fechado por
+médico/evaluador calificado +
+Anexo CV + PMS Report.
+13
+IFU y Artes Maestros de
+Etiquetas + CoA
+Enviar IFU definitivo actualizado (un solo tiempo de permanencia clínica, sin
+datos de Foley, lista exacta de modelos) y muestras/artes de etiqueta
+primaria (Tyvek pouch) y secundaria (caja), más Certificado de Análisis (CoA)
+de lote comercial reciente. Con esos artes, Aporte Médico diseñará los
+rotulados en español cumpliendo Art. 138° (datos de Aporte Médico Perú
+S.A.C. y fabricante).
+Artes con código de control y
+revisión aprobados por QA de
+ACE Medical.
+Borrador Listo para Enviar a ACE Medical Devices Pvt. Ltd. (Inglés Técnico-Regulatorio)
+To: Anuja Khidse (regulatory@acemedicaldevices.com) | Cc: Dr. Hriday Anand, Dalbir Singh, Paula Victoria Gutierrez
+Subject: URGENT REGULATORY ACTION REQUIRED — Critical Audit Findings & Complete Dossier Remediation for Peru DIGEMID Registration
+(ACE Ureteral / D.J. Stent & Set)
+Dear Ms. Anuja and ACE Regulatory Team,
+Following a comprehensive regulatory and forensic audit of the files shared via Dropbox on October 21, 2026 (plus previous submissions to
+DIGEMID Peru resulting in Notifications 2026068505 and Denial Resolution R.D. 4453-2026 ), we must urgently pause our submission
+because DIGEMID will reject the dossier unless the following critical discrepancies and missing documents are resolved simultaneously across
+a single, harmonized Technical File:
+1. Mandatory Master Alignment (SKU Table, Sizes, Shelf Life & Indwelling Time): Currently, your documents contradict one another:
+CER & DVR state 3–8 Fr / 8–30 cm, 2025 FSC Item 15 states 2–12 Fr / 6–32 cm, while 2019 registration covered 3–8 Fr / 6–32 cm. Shelf
+life states 3 years in DVR DRS-22 whereas Accuprec batches expired after 5 years ( 09/2021–08/2026 ). Indwelling duration shifts from
+<25 days to 30–90 days (DVR DRS-23 ), Permanent >30 days (Accuprec), and 6 months (old IFU). Please confirm ONE fixed master
+SKU table (codes, Fr, lengths, variants, Set components & raw material %) and ONE shelf life and indwelling time across every document.
+2. Regulatory Certificates (FSC & CDSCO Manufacturing License): Provide an updated, legible, apostilled FSC issued under CDSCO
+(MDR 2017) — or crystal-clear DGFT FSC strictly listing only Ureteral (D.J.) Stent & Set with all SKUs (never mixed with Item 02 Ureteral
+Catheter 70–90 cm) — together with your current CDSCO Form MD-5 / MD-9 Manufacturing License and valid ISO 13485:2016
+certificate. Also issue a formal Manufacturer Authorization & Product Code/Components Letter addressed to DIGEMID & APORTE
+MEDICO PERU S.A.C. (RUC 20610321268).
+3. Technical Report (Peruvian Art. 130°): The 2-page brochure ( Technical Report_ACE US.pdf ) lacks doc ID, date, signature, SKU table,
+quantitative chemical composition (%), BaSO4/bismuth levels, shelf life, indwelling duration, and a manufacturing process flowchart
+with a brief description of every phase through sterile release.
+4. GSPR Checklist ( ACE/TF/GSPR/DJ-01 ): Correct critical errors: item 18.8 mentions "Gastro-enterological Endoscopic procedures"; items
+14.2 e) & g) repeat "does not need software"; page 62 items 23.4 y), aa), ab) are completely blank; 10.1 c/d vs 23.4 v) and
+
+
+=== PAGINA 13 ===
+AUDITORÍA REGULATORIA DIGEMID · URETERAL STENT / CATÉTERES DOBLE J
+APORTE MÉDICO PERÚ S.A.C. (RUC 20610321268)
+Página 13 de 14
+Documento Técnico-Regulatorio Confidencial · Emitido: 11/11/2026
+23.2 i) vs 23.3 i) contradict each other. Provide updated signed Checklist + Peruvian D.S. 003-2020-SA compliance matrix +
+consistent DoC (addressing EU vs Peru Class III).
+5. Clinical Evaluation Report ( ACE/CES/DJS-02 ): Currently completely unsigned and undated, misses Annexure 3 (evaluator CV) & PMS
+report, states "Class IIa & IIb", says "doesn't contain any components" on p.4, restricts sizes to 3–8 Fr / 8–30 cm, and contains a template
+error on p.17 ("Similar device design: Bottle/grenade type"). Please reissue corrected, reviewed, and signed by a qualified clinical
+evaluator with CV attached.
+6. ETO Sterilization Validation ( ACE/SVR/DJ-02 ): Fix conflicting cycle counts ("2 half cycles" p.2 vs "Three half cycles" p.3), typo "ISO
+111737", and "SAL of 106" on p.10 (must be 10-6 ). Replace generic "Complies" cells with real run dates, lot numbers, chamber ID, BI
+batch/D-value, bioburden data, aeration justification, and attach the original NABL Lab Report for ISO 10993-7 EO/ECH residuals.
+7. Design Verification Report: Provide the actual executed test report with real numeric test results (tensile force ≥15 N / ≥5 N, flow,
+radiopacity), tested lots, applied standards (ISO 20697), doc ID, date, full printed names, signatures and stamp.
+8. Biocompatibility (ISO 10993), Phthalates (SVHC) & Stability/Packaging (ISO 11607):
+The 2022 Accuprec reports tested expired batches (09/2021–08/2026), omit PT0288 (Sensitization), contain severe typos ("Double I
+Catheter", "Umbilical cord clamp"), and create a contradiction by listing "Class IIa Rule 5" alongside "Permanent Exposure (>30 days) /
+Implant". Please provide PT0288 , current/valid biocompatibility coverage addressing all ISO 10993-1 endpoints required for the
+declared duration (including systemic toxicity, subchronic, genotoxicity, implantation & ISO 10993-18 E&L if >30 days), and clean
+original lab PDFs without ACE stamps overlaid.
+Provide an accredited lab SVHC / Phthalates chemical test report confirming exact phthalate % (if any) per ECHA REACH
+Annex/Candidate List to close DIGEMID Obs. 1.7.
+Replace the obsolete 2016/2019 Aavanira stability report with current Real-Time + Accelerated Stability (ASTM F1980) and ISO
+11607-1/-2 Packaging Validation matching the declared shelf life and current pouch/blister.
+9. Risk Management Report (ISO 14971:2019) & Master IFU/Artwork: Provide complete updated ISO 14971:2019 report + FMEA
+probability/severity matrix (missing from Oct 2026 folder), plus updated IFU/label artworks matching all final specs and recent batch CoA.
+Best regards, / Regulatory Affairs & QA — Aporte Médico Perú S.A.C.
+7
+ Plan de Acción Correctivo: Aporte Médico, Consultora y Almacén
+Para salvaguardar la operatividad de la empresa, levantar las alertas ante DICER y evitar una nueva denegatoria o procedimiento
+sancionatorio, ejecute la siguiente hoja de ruta en orden estricto:
+Fase / Plazo
+Responsable
+Acción Concreta y Criterio de Cierre Verificable
+Fase 0
+URGENTE · DÍAS 1–7
+Droguería / DICER
+Gerencia General +
+Nuevo Q.F. Director
+Técnico + Alegroup
+1. Regularizar Carta 11725-2026 (Exp. 26-037851-1) y Expedientes 26131536-1 /
+26131801-1: Verificar el estado en DIGEMID Consulta de Expedientes. Declarar un
+horario de funcionamiento compatible con Comunicado N° 012-2026-DIGEMID (p.
+ej. L–V 08:00–12:00 / 13:00–17:00 o el esquema real validado) y presencia efectiva de
+DT ≥ 4 h/día. Corregir el teléfono 929286974 y correo
+grupo.soulquality@gmail.com en el Formato D del Q.F. Jordan Fernandez Salazar
+(CQFP 31768) por su teléfono personal y correo directo real, y solicitar corrección
+del punto tipográfico ". INT.3C" .
+2. Exigir BPA vigente a Alegroup Perú S.A.C.: Solicitar copia de la
+Resolución/Certificado de renovación de BPA que sustituya al BPA 1132-2023
+vencido el 03/07/2026 y verificar adenda de contrato vigente.
+3. Regularizar las 91 unidades en Área de Bajas: Confirmar inventario físico, fechas de
+vencimiento del lote e instruir acta formal de destrucción mediante EPS-RS / gestor
+autorizado si han caducado o si el nuevo registro tomará > 6 meses (prohibido
+comercializar bajo cualquier modalidad).
+Fase 1
+DÍAS 1–10
+Gobernanza y Auditoría a
+Consultora
+Gerencia General +
+Asesoría Regulatoria
+Independiente
+1. Prohibición absoluta de edición documental: Emitir directriz escrita prohibiendo a
+cualquier consultora modificar fechas, firmas, tablas o normas en archivos Word/PDF
+emitidos por el fabricante o laboratorios acreditados. Todo cambio técnico debe
+provenir formalmente de ACE Medical / Accuprec.
+2. Recuperar expedientes cerrados: Exigir a Soul Quality entrega inmediata (descarga
+directa) de EXP. N°25157794_URETERAL STENT_DOC. SUBIDOS VUCE.rar , Doc.
+Presentados _URETERAL STENT.rar , la copia íntegra de la R.D. N° 4453-2026 y
+los expedientes de Cinta Vaginal (R.D. 7456) para evaluar el historial exacto
+cargado en VUCE.
+3. Evaluar reemplazo o reestructuración de consultoría: Dado el historial de rechazos
+(Ureteral Stent x2, Cinta Vaginal R.D. 7456), propuesta explícita de alterar fechas y
+errores críticos en trámites DT/horarios, evaluar contratación de una consultora
+independiente (otra firma o equipo Q.F. especializado con trazabilidad auditable) y
+exigir doble control previo por Gerencia antes de subir archivos a VUCE.
+
+
+=== PAGINA 14 ===
+AUDITORÍA REGULATORIA DIGEMID · URETERAL STENT / CATÉTERES DOBLE J
+APORTE MÉDICO PERÚ S.A.C. (RUC 20610321268)
+Página 14 de 14
+Documento Técnico-Regulatorio Confidencial · Emitido: 11/11/2026
+Fase / Plazo
+Responsable
+Acción Concreta y Criterio de Cierre Verificable
+Fase 2
+TRAS RESPUESTA DE ACE
+Armado del Dossier y Pre-
+Filtro VUCE
+ACE Medical +
+Traductor Técnico + Q.F.
+Regulador
+1. Enviar carta de requerimiento de Sección 6 a ACE Medical y fijar reunión técnica
+con Anuja Khidse para congelar un único cuadro maestro (SKU, Fr, cm, composición,
+vida útil 36 o 60 meses, permanencia < 30 d o > 30 d).
+2. Traducciones técnicas profesionales: Traducir al español todo documento en inglés
+respetando terminología urológica y normativa DIGEMID (eliminando errores de
+traductor automático).
+3. Elaborar documentos locales congruentes: (a) Formato DISMED Parte I y II con
+desglose completo de componentes y códigos; (b) Rotulados mediato e inmediato
+nuevos para Aporte Médico Perú S.A.C. conforme Art. 138° D.S. 016-2011-SA (en
+español, por código único, con datos del fabricante y droguería actualizados); (c) IFU
+en español alineado palabra por palabra al Informe de Riesgos y al CER.
+4. Auditoría Cero-Errores Pre-Pago (Gate Check): NO pagar ni radicar la tasa TUPA
+250 (S/ 1,812.00) hasta validar mediante matriz cruzada que los 13 requisitos del Art.
+126° están completos, apostillados, firmados, fechados y 100% coherentes entre sí.
+Checklist Rápido de Control "Pasa / No Pasa" antes del Próximo Pago en VUCE
+[ ] ¿CLV vigente (≤ 1 año si es DGFT / ≤ 2 años si es CDSCO), sello 100% nítido y apostillado para Perú? (Sin mezclar Ítem 02
+Ureteral Catheter).
+[ ] ¿Licencia CDSCO (MD-5/MD-9) + ISO 13485:2016 vigentes y apostillados si corresponde?
+[ ] ¿Códigos SKU, Fr, longitud cm y componentes idénticos al 100% entre CLV, Carta Fabricante, DISMED, Informe Técnico,
+DVR, CER, IFU y Rotulados?
+[ ] ¿Misma clasificación de riesgo (Clase III Perú) y misma vida útil (3 o 5 años) y mismo tiempo de permanencia en todo el
+expediente?
+[ ] ¿Biocompatibilidad ISO 10993 completa (con PT0288 + endpoints >30 d si aplica) sobre lotes NO vencidos + Test Report
+analítico de Ftalatos/SVHC?
+[ ] ¿Validación EO con SAL 10-6 corregida, ciclos consistentes, datos reales + Reporte NABL ISO 10993-7 residuales adjunto?
+[ ] ¿Estabilidad actual + Empaque ISO 11607 + Gestión de Riesgos ISO 14971:2019 (FMEA) + CER firmado por médico con CV
++ GSPR mapeado a D.S. 003-2020-SA (sin frases GI ni "Bottle/grenade")?
+[ ] ¿Droguería EF 0110592 con DT activo (≥ 4 h/día), horario compatible con Comunicado 012-2026 y BPA vigente propio o de
+Alegroup (posterior al 03/07/2026)?
+
+

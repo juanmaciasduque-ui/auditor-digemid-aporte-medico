@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.ocr_cache/
+.pytest_cache/
+reports/
+venv/
+.env
