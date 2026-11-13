@@ -1,0 +1,55 @@
+===============================================================================
+       SISTEMA AUDITOR FORENSE DOCUMENTAL DIGEMID (PERU)
+                  APORTE MEDICO PERU S.A.C.
+===============================================================================
+
+¡Bienvenida/o! Esta aplicacion permite auditar expedientes tecnicos y legales
+de dispositivos medicos ante DIGEMID (Peru), detectando fallas de digitacion,
+inconsistencias cruzadas de medidas, descalces de vida util, problemas de
+esterilizacion, normas derogadas y causales de rechazo oficial.
+
+
+-------------------------------------------------------------------------------
+1. COMO INSTALAR EL PROGRAMA EN ESTE EQUIPO (SOLO LA PRIMERA VEZ):
+-------------------------------------------------------------------------------
+1. Haz doble clic en el archivo:
+   👉 "Instalar_Auditor.bat"
+
+2. El instalador se encargara de preparar todo automaticamente:
+   - Verificara o instalara Python de forma segura.
+   - Instalara los motores de lectura de PDFs, OCR y analisis cruzado.
+   - Creara el acceso directo con el logo en tu Escritorio.
+   - Abrira la aplicacion directamente en tu navegador web.
+
+
+-------------------------------------------------------------------------------
+2. COMO ABRIR EL PROGRAMA EN EL DIA A DIA:
+-------------------------------------------------------------------------------
+Una vez instalado, tienes dos formas sencillas de abrirlo:
+- Opcion A: Doble clic en el icono de tu Escritorio: "Auditor DIGEMID - Aporte Medico"
+- Opcion B: Doble clic en "Auditor_DIGEMID.bat" en esta carpeta.
+
+
+-------------------------------------------------------------------------------
+3. PERMISOS DE RED / ACCESO DESDE OTRAS COMPUTADORAS (OPCIONAL):
+-------------------------------------------------------------------------------
+Si deseas que otras personas de tu oficina o red local puedan abrir el auditor
+desde sus propias computadoras o celulares sin instalar nada:
+1. Haz clic derecho en "Habilitar_Permisos_Red.bat" y selecciona "Ejecutar como administrador".
+2. Comparte la direccion IP de tu equipo con ellos (ejemplo: http://192.168.1.50:8501).
+
+
+-------------------------------------------------------------------------------
+4. PREGUNTAS FRECUENTES Y SEGURIDAD:
+-------------------------------------------------------------------------------
+¿El antivirus lo bloquea?
+- No. El programa utiliza componentes oficiales de Python y librerias estandar
+  de lectura cientifica (PyMuPDF / RapidOCR). No contiene software malicioso
+  ni troyanos.
+
+¿Mis documentos se suben a Internet?
+- NO. La auditoria se realiza 100% de manera local en tu propia computadora.
+  Toda la documentacion tecnica, formulas y validaciones de los fabricantes
+  permanecen totalmente confidenciales en tu disco duro.
+
+Soporte Tecnico: APORTE MEDICO PERU S.A.C.
