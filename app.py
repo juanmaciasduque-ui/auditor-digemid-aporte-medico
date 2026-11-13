@@ -15,7 +15,14 @@ from core.auditor import DigemidDocumentAuditor
 from core.report_generator import ReportGenerator
 from core.models import Severity, Category, BatchAuditResult
 from core.agents.digemid_agent import DigemidAgent
-from config import BASE_CASE_INFO, DEFAULT_TEST_DATA_DIR, REPORTS_DIR, DIGEMID_LEGAL_FRAMEWORK
+from config import (
+    BASE_CASE_INFO,
+    DEFAULT_TEST_DATA_DIR,
+    VAGINAL_SLING_DATA_DIR,
+    REPORTS_DIR,
+    DIGEMID_LEGAL_FRAMEWORK,
+    PRODUCT_FAMILIES
+)
 
 # Configuración de página
 st.set_page_config(
@@ -130,8 +137,30 @@ with col_title:
 
 st.markdown("---")
 
+# SELECTOR DE PERFIL DE DISPOSITIVO MÉDICO (SOPORTE UNIVERSAL DIGEMID)
+col_fam, col_info_fam = st.columns([1.5, 2.5])
+with col_fam:
+    selected_family_key = st.selectbox(
+        "🎯 Perfil de Dispositivo Médico a Auditar:",
+        list(PRODUCT_FAMILIES.keys()),
+        format_func=lambda k: PRODUCT_FAMILIES[k]["nombre"],
+        index=0,
+        help="El motor aplica reglas universales del D.S. 016-2011-SA y calibra las unidades dimensionales esperadas."
+    )
+with col_info_fam:
+    fam_info = PRODUCT_FAMILIES[selected_family_key]
+    st.markdown(f"""
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-top: 5px;">
+        <span style="font-weight: 700; color: #1e3a8a;">⚖️ Base Legal:</span> <code>{fam_info.get('norma_base', 'D.S. 016-2011-SA')}</code> |
+        <span style="font-weight: 700; color: #1e3a8a;">🛡️ Clase de Riesgo:</span> <code>{fam_info.get('clase_defecto', 'Clase I-IV')}</code><br>
+        <span style="font-size: 0.88rem; color: #475569;">{fam_info['descripcion']}</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("---")
+
 # ZONA DE CARGA DE DOCUMENTOS / CARPETA (SIN LOGIN NI BARRERAS)
-c_upload, c_quick = st.columns([3, 1])
+c_upload, c_quick = st.columns([3, 1.2])
 
 with c_upload:
     uploaded_files = st.file_uploader(
@@ -143,18 +172,26 @@ with c_upload:
 
 with c_quick:
     st.markdown("**¿Probar expediente real?**")
-    test_suite_btn = st.button("⚡ Cargar Banco de Pruebas Real\n(Catéteres ACE Medical)", use_container_width=True)
+    test_suite_btn = st.button("⚡ Caso 1: Catéteres Doble J\n(ACE Medical · 10 archivos)", use_container_width=True)
+    test_sling_btn = st.button("⚡ Caso 2: Cinta Vaginal / Mallas\n(Orion · Malla TOT/TVT)", use_container_width=True)
 
 archivos_para_auditar = []
 
 if test_suite_btn:
     if DEFAULT_TEST_DATA_DIR.exists():
         archivos_para_auditar = list(DEFAULT_TEST_DATA_DIR.glob("*.pdf")) + list(DEFAULT_TEST_DATA_DIR.glob("*.docx"))
-        # Excluir duplicados de paquetes de 70 páginas para auditoría instantánea
         archivos_para_auditar = [f for f in archivos_para_auditar if "EXPEDIENTE" not in f.name.upper() and "DOCUMENTOS TÉCNICOS" not in f.name.upper()]
-        st.toast(f"Cargados {len(archivos_para_auditar)} documentos del expediente técnico real.", icon="📂")
+        st.toast(f"Cargados {len(archivos_para_auditar)} documentos del Caso Real 1 (Catéteres Doble J).", icon="📂")
     else:
         st.error(f"No se encontró el directorio base {DEFAULT_TEST_DATA_DIR}")
+
+elif test_sling_btn:
+    if VAGINAL_SLING_DATA_DIR.exists():
+        archivos_para_auditar = list(VAGINAL_SLING_DATA_DIR.glob("*.pdf")) + list(VAGINAL_SLING_DATA_DIR.glob("*.docx"))
+        archivos_para_auditar = [f for f in archivos_para_auditar if not f.is_dir()][:10] # Top 10 documentos técnicos
+        st.toast(f"Cargados {len(archivos_para_auditar)} documentos del Caso Real 2 (Cintas Vaginales / Mallas).", icon="📂")
+    else:
+        st.error(f"No se encontró el directorio base {VAGINAL_SLING_DATA_DIR}")
 
 elif uploaded_files:
     temp_dir = Path(tempfile.gettempdir()) / "aporte_digemid_uploads"

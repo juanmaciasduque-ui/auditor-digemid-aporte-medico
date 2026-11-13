@@ -19,45 +19,81 @@ class CrossDocumentConsistencyEngine:
     """Motor de análisis de concordancia cruzada y contaminación documental."""
 
     def extract_document_parameters(self, doc_name: str, pages_text: Dict[int, str]) -> ExtractedParameters:
-        """Extrae parámetros numéricos y clínicos clave de un documento individual."""
+        """Extrae parámetros universales numéricos y clínicos de cualquier tipo de dispositivo médico."""
         params = ExtractedParameters()
         full_text = " ".join(pages_text.values())
 
+        # 0. Identificación automática del producto
+        if re.search(r'\b(?:cinta\s+vaginal|sling|malla|mesh|incontinencia)\b', full_text, re.IGNORECASE):
+            params.detected_product_name = "Cinta Vaginal / Malla Quirúrgica"
+            params.detected_risk_class = "Clase III (Implante Quirúrgico)"
+        elif re.search(r'\b(?:cat[eé]ter\s+ureteral|stent\s+ureteral|doble\s*j|pigtail)\b', full_text, re.IGNORECASE):
+            params.detected_product_name = "Catéter / Stent Ureteral Doble J"
+            params.detected_risk_class = "Clase III (Invasivo Quirúrgico)"
+        elif re.search(r'\b(?:asa\s+de\s+resecci[oó]n|resection\s+loop|electrodo)\b', full_text, re.IGNORECASE):
+            params.detected_product_name = "Asa de Resección Endoscópica"
+            params.detected_risk_class = "Clase IIb / III"
+        elif re.search(r'\b(?:sutura|suture|poliglactina|polidioxanona)\b', full_text, re.IGNORECASE):
+            params.detected_product_name = "Sutura Quirúrgica"
+            params.detected_risk_class = "Clase IIb / III"
+        elif re.search(r'\b(?:jeringa|syringe|aguja|needle|venoclisis)\b', full_text, re.IGNORECASE):
+            params.detected_product_name = "Equipo de Infusión / Jeringa"
+            params.detected_risk_class = "Clase IIa"
+        else:
+            params.detected_product_name = "Dispositivo Médico General"
+            params.detected_risk_class = "Clase I / II / III / IV"
+
         # 1. Extracción de diámetros Fr
-        # Patrones: '2-12 Fr', '3 - 8 Fr', '3 to 8 Fr', '3Fr to 8Fr', '3-10 Fr', '8Fr - 28Fr'
         fr_matches = re.findall(r'\b(\d+(?:\.\d+)?)\s*(?:[-–to]|a)\s*(\d+(?:\.\d+)?)\s*(?:Fr|FG|CH)\b', full_text, re.IGNORECASE)
         all_frs = []
         for low_s, high_s in fr_matches:
             try:
-                low = float(low_s)
-                high = float(high_s)
-                all_frs.extend([low, high])
+                all_frs.extend([float(low_s), float(high_s)])
             except ValueError:
                 pass
         if all_frs:
             params.diameters_fr = [min(all_frs), max(all_frs)]
             params.diameters_fr_raw = f"{min(all_frs)}–{max(all_frs)} Fr"
 
-        # 2. Extracción de longitudes en cm
-        # Patrones: '6-32 cm', '8 to 30 cm', '70-90 cm', '06 - 32 cm'
+        # 2. Extracción de calibres Gauge (G)
+        g_matches = re.findall(r'\b(\d+)\s*(?:G|Gauge)\b', full_text, re.IGNORECASE)
+        if g_matches:
+            params.gauges = [int(g) for g in g_matches]
+            params.gauges_raw = ", ".join(set(g_matches)) + " G"
+
+        # 3. Extracción de dimensiones de mallas/cintas (ej: 1.1 x 50 cm, 1 x 36 cm, 10 x 15 cm)
+        mesh_m = re.findall(r'\b(\d+(?:\.\d+)?)\s*(?:x|×|de\s+ancho\s+por)\s*(\d+(?:\.\d+)?)\s*(?:cm|mm)\b', full_text, re.IGNORECASE)
+        if mesh_m:
+            for w, l in mesh_m:
+                params.mesh_dimensions.append(f"{w} x {l} cm")
+        # Patrón inverso: 36 cm de largo por un/1 cm de ancho
+        mesh_inv = re.findall(r'\b(\d+(?:\.\d+)?)\s*cm\s+de\s+largo\s+por\s+(?:un|1|\d+(?:\.\d+)?)\s*cm\s+de\s+ancho\b', full_text, re.IGNORECASE)
+        for l in mesh_inv:
+            params.mesh_dimensions.append(f"1 x {l} cm")
+        # Dimensiones en reportes en inglés (Length in cm: 11 cm)
+        mesh_eng = re.findall(r'Length\s*(?:in\s*cm)?\s*[:\-_]?\s*(\d+(?:\.\d+)?)\s*cms?', full_text, re.IGNORECASE)
+        for l in mesh_eng:
+            params.mesh_dimensions.append(f"Longitud {l} cm")
+
+        # 4. Extracción de longitudes en cm
         cm_matches = re.findall(r'\b(\d+)\s*(?:[-–to]|a)\s*(\d+)\s*cm\b', full_text, re.IGNORECASE)
         all_cms = []
         for low_s, high_s in cm_matches:
             try:
-                low = float(low_s)
-                high = float(high_s)
-                all_cms.extend([low, high])
+                all_cms.extend([float(low_s), float(high_s)])
             except ValueError:
                 pass
         if all_cms:
             params.lengths_cm = [min(all_cms), max(all_cms)]
             params.lengths_cm_raw = f"{min(all_cms)}–{max(all_cms)} cm"
 
-        # 3. Extracción de vida útil (shelf life)
-        # Buscar: '3 years', '3 años', '5 years', '5 años', '60 months', '36 months', '1 day', '1 día'
+        # 5. Extracción de vida útil (shelf life)
         if re.search(r'\b(?:1\s*d[ií]a|1\s*day)\b', full_text, re.IGNORECASE):
             params.shelf_life_months = round(1 / 30, 2)
             params.shelf_life_raw = "1 día"
+        elif re.search(r'\b(?:2\s*years?|2\s*a[ñn]os?|24\s*months?|24\s*meses)\b', full_text, re.IGNORECASE):
+            params.shelf_life_months = 24
+            params.shelf_life_raw = "2 años (24 meses)"
         elif re.search(r'\b(?:3\s*years?|3\s*a[ñn]os?|36\s*months?|36\s*meses)\b', full_text, re.IGNORECASE):
             params.shelf_life_months = 36
             params.shelf_life_raw = "3 años (36 meses)"
@@ -65,23 +101,62 @@ class CrossDocumentConsistencyEngine:
             params.shelf_life_months = 60
             params.shelf_life_raw = "5 años (60 meses)"
 
-        # 4. Extracción de tiempo de permanencia clínica (indwelling time)
-        # '25 days', '30-90 days', '> 30 days', 'permanent implant', '6 months'
-        if re.search(r'\b(?:not\s+to\s+be\s+kept\s+indwelling\s+for\s+more\s+than\s+25\s+days|menos\s+de\s+25\s+d[ií]as|25\s*d[ií]as?)\b', full_text, re.IGNORECASE):
+        # 6. Extracción de tiempo de permanencia clínica (indwelling time)
+        if re.search(r'\b(?:menos\s+de\s+24\s+horas|<24\s*h|uso\s+transitorio)\b', full_text, re.IGNORECASE):
+            params.indwelling_time_days = 1
+            params.indwelling_time_raw = "< 24 horas (Transitorio)"
+        elif re.search(r'\b(?:not\s+to\s+be\s+kept\s+indwelling\s+for\s+more\s+than\s+25\s+days|menos\s+de\s+25\s+d[ií]as|25\s*d[ií]as?)\b', full_text, re.IGNORECASE):
             params.indwelling_time_days = 25
-            params.indwelling_time_raw = "< 25 días"
+            params.indwelling_time_raw = "< 25 días (Corto plazo)"
         elif re.search(r'\b(?:30\s*[-–to]\s*90\s*days?|30\s*[-–a]\s*90\s*d[ií]as?)\b', full_text, re.IGNORECASE):
             params.indwelling_time_days = 90
-            params.indwelling_time_raw = "30–90 días"
-        elif re.search(r'\b(?:6\s*months?|6\s*meses)\b[^\.\n]{0,40}\b(?:indwelling|permanencia)\b', full_text, re.IGNORECASE) or \
-             re.search(r'\b(?:indwelling|permanencia)\b[^\.\n]{0,40}\b(?:6\s*months?|6\s*meses)\b', full_text, re.IGNORECASE):
+            params.indwelling_time_raw = "30–90 días (Prolongado)"
+        elif re.search(r'\b(?:6\s*months?|6\s*meses)\b[^\.\n]{0,40}\b(?:indwelling|permanencia)\b', full_text, re.IGNORECASE):
             params.indwelling_time_days = 180
             params.indwelling_time_raw = "6 meses"
-        elif re.search(r'\b(?:Permanent\s+Exposure|\>\s*30\s*days|Implant\s+Device)\b', full_text, re.IGNORECASE):
+        elif re.search(r'\b(?:Permanent\s+Exposure|\>\s*30\s*days|Implant\s+Device|implante\s+definitivo|permanente)\b', full_text, re.IGNORECASE):
             params.indwelling_time_days = 365
             params.indwelling_time_raw = "> 30 días / Implante Permanente"
 
-        # 5. Detección de componentes del Set
+        # 7. Materiales declarados
+        if re.search(r'\b(?:polyurethane|poliuretano)\b', full_text, re.IGNORECASE):
+            params.materials.append("Poliuretano")
+        if re.search(r'\b(?:polypropylene|polipropileno)\b', full_text, re.IGNORECASE):
+            params.materials.append("Polipropileno")
+        if re.search(r'\b(?:silicone|silicona)\b', full_text, re.IGNORECASE):
+            params.materials.append("Silicona")
+        if re.search(r'\b(?:stainless\s+steel|acero\s+inoxidable)\b', full_text, re.IGNORECASE):
+            params.materials.append("Acero Inoxidable")
+
+        # 8. Métodos de esterilización
+        # Priorizar declaración explícita en encabezado o campo 'MÉTODO DE ESTERILIZACIÓN'
+        explicit_steril = re.search(
+            r'(?:M[EÉ]TODO\s+DE\s+ESTERILIZACI[OÓ]N|STERILIZATION\s+METHOD|ESTERILIZACION\s+A)\s*[:\-_]?\s*([^\.\n\r]+)',
+            full_text,
+            re.IGNORECASE
+        )
+        if explicit_steril:
+            val_s = explicit_steril.group(1).strip()
+            if re.search(r'per[oó]xido|plasma|sterrad', val_s, re.IGNORECASE):
+                params.sterilization_methods.append("Peróxido de Hidrógeno (Plasma)")
+            elif re.search(r'[oó]xido\s+de\s+etileno|EO|ETO', val_s, re.IGNORECASE):
+                params.sterilization_methods.append("Óxido de Etileno (EO)")
+            elif re.search(r'gamma|radiaci[oó]n', val_s, re.IGNORECASE):
+                params.sterilization_methods.append("Radiación Gamma")
+            elif re.search(r'vapor|autoclave', val_s, re.IGNORECASE):
+                params.sterilization_methods.append("Vapor / Autoclave")
+
+        if not params.sterilization_methods:
+            if re.search(r'\b(?:ethylene\s+oxide|[oó]xido\s+de\s+etileno|EO\s+sterilization|ETO)\b', full_text, re.IGNORECASE):
+                params.sterilization_methods.append("Óxido de Etileno (EO)")
+            if re.search(r'\b(?:gamma\s+radiation|radiaci[oó]n\s+gamma|cobalt\s*60)\b', full_text, re.IGNORECASE):
+                params.sterilization_methods.append("Radiación Gamma")
+            if re.search(r'\b(?:steam|vapor|autoclave)\b', full_text, re.IGNORECASE):
+                params.sterilization_methods.append("Vapor / Autoclave")
+            if re.search(r'\b(?:per[oó]xido\s+de\s+hidr[oó]geno|hydrogen\s+peroxide|plasma|sterrad)\b', full_text, re.IGNORECASE):
+                params.sterilization_methods.append("Peróxido de Hidrógeno (Plasma)")
+
+        # 9. Componentes del Set / Kit
         if re.search(r'\b(?:doesn\'?t\s+contain\s+any\s+components?|no\s+contains?\s+any\s+components?|sin\s+componentes)\b', full_text, re.IGNORECASE):
             params.components.append("NO_COMPONENTS_DECLARED")
         if re.search(r'\b(?:guidewire|gu[ií]a\s+hidrof[ií]lica|PTFE\s+guidewire)\b', full_text, re.IGNORECASE):
@@ -89,11 +164,11 @@ class CrossDocumentConsistencyEngine:
         if re.search(r'\b(?:pusher|posicionador|empujador)\b', full_text, re.IGNORECASE):
             params.components.append("Empujador")
         if re.search(r'\b(?:clamp|pinza)\b', full_text, re.IGNORECASE):
-            params.components.append("Clamp")
-        if re.search(r'\b(?:suture|thread|hilo\s+de\s+sujeci[oó]n)\b', full_text, re.IGNORECASE):
-            params.components.append("Sutura")
+            params.components.append("Clamp / Pinza")
+        if re.search(r'\b(?:varilla|aguja\s+pasadora|trocar|pasador)\b', full_text, re.IGNORECASE):
+            params.components.append("Varilla / Pasador")
 
-        # 6. Detección de Contaminaciones Clínicas (Copy-Paste de otros productos)
+        # 10. Contaminaciones Clínicas (Copy-Paste de otros dispositivos)
         if re.search(r'\b(?:Bottle/grenade\s+type|botella/granada|grenade\s+type)\b', full_text, re.IGNORECASE):
             params.foreign_contaminations.append("Bottle/grenade type (Drenaje quirúrgico)")
         if re.search(r'\b(?:Gastro-enterological|gastroenterolog[ií]a|endoscopic\s+gastro)\b', full_text, re.IGNORECASE):
@@ -403,5 +478,137 @@ class CrossDocumentConsistencyEngine:
                 digemid_norm_ref="D.S. 016-2011-SA Art. 126° y 130°",
                 remediation_advice="Actualizar el CER para que evalúe y liste explícitamente todos los componentes del Set.",
             ))
+
+        # 6. Descalce de Dimensiones de Malla / Cinta Quirúrgica (Cintas Vaginales / Mallas)
+        mesh_by_doc: Dict[str, Set[str]] = {}
+        for name, rep in doc_reports.items():
+            if rep.parameters.mesh_dimensions:
+                mesh_by_doc[name] = set(rep.parameters.mesh_dimensions)
+
+        if len(mesh_by_doc) >= 2:
+            m_items = list(mesh_by_doc.items())
+            for i in range(len(m_items)):
+                for j in range(i + 1, len(m_items)):
+                    doc1, dims1 = m_items[i]
+                    doc2, dims2 = m_items[j]
+                    if dims1 != dims2 and not (dims1.issubset(dims2) or dims2.issubset(dims1)):
+                        cross_findings.append(Finding(
+                            id=f"CROSS_MESH_DIM_CLASH_{i}_{j}",
+                            document_name=f"{doc1} vs {doc2}",
+                            page=None,
+                            severity=Severity.FATAL,
+                            category=Category.CROSS_DOCUMENT,
+                            title="Descalce en Dimensiones de Malla/Cinta Quirúrgica entre Documentos",
+                            description=(
+                                f"Inconsistencia dimensional en implante de malla/cinta: '{doc1}' declara {', '.join(sorted(dims1))}, "
+                                f"mientras que '{doc2}' declara {', '.join(sorted(dims2))}. "
+                                "DIGEMID exige que las medidas de la malla en el Certificado de Análisis, Ficha Técnica, "
+                                "Manual IFU y Rotulado coincidan exactamente."
+                            ),
+                            detected_text=f"{doc1}: {', '.join(sorted(dims1))} | {doc2}: {', '.join(sorted(dims2))}",
+                            expected_text="Dimensiones de malla idénticas en todos los documentos del expediente",
+                            digemid_norm_ref="D.S. 016-2011-SA Art. 130°",
+                            remediation_advice="Armonizar las medidas (ancho x largo en cm o mm) en toda la documentación técnica y rótulos.",
+                        ))
+
+        # 7. Descalce en Método de Esterilización
+        steril_by_doc: Dict[str, Set[str]] = {}
+        for name, rep in doc_reports.items():
+            if rep.parameters.sterilization_methods:
+                steril_by_doc[name] = set(rep.parameters.sterilization_methods)
+
+        if len(steril_by_doc) >= 2:
+            st_items = list(steril_by_doc.items())
+            for i in range(len(st_items)):
+                for j in range(i + 1, len(st_items)):
+                    doc1, m1 = st_items[i]
+                    doc2, m2 = st_items[j]
+                    if m1 != m2 and not (m1.issubset(m2) or m2.issubset(m1)):
+                        cross_findings.append(Finding(
+                            id=f"CROSS_STERILIZATION_CLASH_{i}_{j}",
+                            document_name=f"{doc1} vs {doc2}",
+                            page=None,
+                            severity=Severity.FATAL,
+                            category=Category.CROSS_DOCUMENT,
+                            title="Contradicción Crítica en Método de Esterilización entre Documentos",
+                            description=(
+                                f"Conflicto grave en el proceso de esterilización declarado: '{doc1}' declara {', '.join(sorted(m1))}, "
+                                f"mientras que '{doc2}' declara {', '.join(sorted(m2))}. "
+                                "Una contradicción en el método de esterilización invalida las validaciones microbiológicas "
+                                "(ISO 11135 para EO vs ISO 11137 para Radiación Gamma) y los ensayos de citotoxicidad y residuales."
+                            ),
+                            detected_text=f"{doc1}: {', '.join(sorted(m1))} vs {doc2}: {', '.join(sorted(m2))}",
+                            expected_text="Método de esterilización único y congruente en todos los documentos",
+                            digemid_norm_ref="D.S. 016-2011-SA Art. 130° / ISO 11135 / ISO 11137",
+                            remediation_advice="Confirmar con el fabricante el método validado y corregir los documentos discordantes.",
+                        ))
+
+        # 8. Descalce en Materia Prima / Composición Polimérica
+        mat_by_doc: Dict[str, Set[str]] = {}
+        for name, rep in doc_reports.items():
+            if rep.parameters.materials:
+                mat_by_doc[name] = set(rep.parameters.materials)
+
+        if len(mat_by_doc) >= 2:
+            mat_items = list(mat_by_doc.items())
+            for i in range(len(mat_items)):
+                for j in range(i + 1, len(mat_items)):
+                    doc1, mats1 = mat_items[i]
+                    doc2, mats2 = mat_items[j]
+                    incompatible_pairs = [
+                        ({"Poliuretano"}, {"Polipropileno"}),
+                        ({"Silicona"}, {"Poliuretano"}),
+                    ]
+                    for s1, s2 in incompatible_pairs:
+                        if (s1.issubset(mats1) and s2.issubset(mats2)) or (s2.issubset(mats1) and s1.issubset(mats2)):
+                            cross_findings.append(Finding(
+                                id=f"CROSS_MATERIAL_CLASH_{i}_{j}",
+                                document_name=f"{doc1} vs {doc2}",
+                                page=None,
+                                severity=Severity.FATAL,
+                                category=Category.CROSS_DOCUMENT,
+                                title="Inconsistencia Crítica en la Materia Prima / Composición del Dispositivo",
+                                description=(
+                                    f"Contradicción grave en la composición del polímero: '{doc1}' declara {', '.join(sorted(mats1))}, "
+                                    f"mientras que '{doc2}' declara {', '.join(sorted(mats2))}. "
+                                    "La naturaleza química de la materia prima determina la biocompatibilidad (ISO 10993) "
+                                    "y la vida útil. Mezclar polímeros distintos causa el rechazo inmediato del expediente."
+                                ),
+                                detected_text=f"{doc1}: {', '.join(sorted(mats1))} vs {doc2}: {', '.join(sorted(mats2))}",
+                                expected_text="Especificación unívoca del material en Ficha Técnica, DVR, CER y Rótulos",
+                                digemid_norm_ref="D.S. 016-2011-SA Art. 130°",
+                                remediation_advice="Verificar la resina o polímero grado médico exacto y estandarizar la especificación.",
+                            ))
+                            break
+
+        # 9. Discrepancia en Calibres Gauge (G)
+        g_by_doc: Dict[str, Tuple[Set[int], str]] = {}
+        for name, rep in doc_reports.items():
+            if rep.parameters.gauges:
+                g_by_doc[name] = (set(rep.parameters.gauges), rep.parameters.gauges_raw)
+
+        if len(g_by_doc) >= 2:
+            g_items = list(g_by_doc.items())
+            for i in range(len(g_items)):
+                for j in range(i + 1, len(g_items)):
+                    doc1, (s_g1, raw_g1) = g_items[i]
+                    doc2, (s_g2, raw_g2) = g_items[j]
+                    if s_g1 != s_g2 and not (s_g1.issubset(s_g2) or s_g2.issubset(s_g1)):
+                        cross_findings.append(Finding(
+                            id=f"CROSS_GAUGE_CLASH_{i}_{j}",
+                            document_name=f"{doc1} vs {doc2}",
+                            page=None,
+                            severity=Severity.CRITICAL,
+                            category=Category.CROSS_DOCUMENT,
+                            title="Discrepancia en Calibre de Aguja/Trocar (Gauge) entre Documentos",
+                            description=(
+                                f"Discrepancia en calibre de agujas o accesorios: '{doc1}' declara {raw_g1}, "
+                                f"mientras que '{doc2}' declara {raw_g2}."
+                            ),
+                            detected_text=f"{doc1}: {raw_g1} vs {doc2}: {raw_g2}",
+                            expected_text="Calibre Gauge uniforme y justificado clínicamente",
+                            digemid_norm_ref="D.S. 016-2011-SA Art. 130°",
+                            remediation_advice="Uniformar el calibre de aguja/trocar en la ficha técnica y manual.",
+                        ))
 
         return cross_findings

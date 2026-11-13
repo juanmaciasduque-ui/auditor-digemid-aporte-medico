@@ -89,10 +89,16 @@ class DocumentMetadata:
 
 @dataclass
 class ExtractedParameters:
+    detected_product_name: str = ""
+    detected_risk_class: str = ""
     diameters_fr: List[float] = field(default_factory=list)
     diameters_fr_raw: str = ""
+    gauges: List[int] = field(default_factory=list)
+    gauges_raw: str = ""
     lengths_cm: List[float] = field(default_factory=list)
     lengths_cm_raw: str = ""
+    mesh_dimensions: List[str] = field(default_factory=list)
+    volumes_ml: List[float] = field(default_factory=list)
     shelf_life_months: Optional[float] = None
     shelf_life_raw: str = ""
     indwelling_time_days: Optional[float] = None
@@ -100,17 +106,25 @@ class ExtractedParameters:
     device_types: List[str] = field(default_factory=list)
     components: List[str] = field(default_factory=list)
     materials: List[str] = field(default_factory=list)
+    sterilization_methods: List[str] = field(default_factory=list)
     foreign_contaminations: List[str] = field(default_factory=list)
     iso_standards_cited: List[str] = field(default_factory=list)
     derogated_standards: List[str] = field(default_factory=list)
     half_cycles_count: Optional[int] = None
+    page_count_discrepancies: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
+            "detected_product_name": self.detected_product_name,
+            "detected_risk_class": self.detected_risk_class,
             "diameters_fr": self.diameters_fr,
             "diameters_fr_raw": self.diameters_fr_raw,
+            "gauges": self.gauges,
+            "gauges_raw": self.gauges_raw,
             "lengths_cm": self.lengths_cm,
             "lengths_cm_raw": self.lengths_cm_raw,
+            "mesh_dimensions": self.mesh_dimensions,
+            "volumes_ml": self.volumes_ml,
             "shelf_life_months": self.shelf_life_months,
             "shelf_life_raw": self.shelf_life_raw,
             "indwelling_time_days": self.indwelling_time_days,
@@ -118,10 +132,12 @@ class ExtractedParameters:
             "device_types": self.device_types,
             "components": self.components,
             "materials": self.materials,
+            "sterilization_methods": self.sterilization_methods,
             "foreign_contaminations": self.foreign_contaminations,
             "iso_standards_cited": self.iso_standards_cited,
             "derogated_standards": self.derogated_standards,
             "half_cycles_count": self.half_cycles_count,
+            "page_count_discrepancies": self.page_count_discrepancies,
         }
 
 

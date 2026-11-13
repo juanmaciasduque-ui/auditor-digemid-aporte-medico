@@ -218,5 +218,64 @@ def test_digemid_historical_importer_teleandes():
     assert any("Consorcio Teleandes" in f.title for f in findings)
 
 
+# ==============================================================================
+# PRUEBAS UNIVERSALES: MALLAS, ESTERILIZACIÓN, MATERIA PRIMA Y FOLIACIÓN
+# ==============================================================================
+
+def test_page_count_discrepancy_missing_pages():
+    rules = StructureIntegrityRules()
+    # Archivo que solo tiene 3 páginas pero en el pie de página declara "Página 1 de 5"
+    pages = {
+        1: "Manual de Uso. Página 1 de 5",
+        2: "Descripción técnica. Página 2 de 5",
+        3: "Advertencias clínicas. Página 3 de 5",
+    }
+    findings = rules.analyze_document("Manual_Cinta.pdf", pages, tables_data=[], total_pages=3)
+    assert any("Foliación Incompleta: Páginas Faltantes" in f.title for f in findings)
+    assert any(f.severity.value == "FATAL" for f in findings)
+
+
+def test_cross_batch_mesh_dimension_clash():
+    engine = CrossDocumentConsistencyEngine()
+    # Doc 1: Ficha técnica declara 1.1 x 50 cm
+    p1 = engine.extract_document_parameters("Ficha.pdf", {1: "Dimensiones de la cinta de polipropileno: 1.1 x 50 cm"})
+    rep1 = DocumentReport(metadata=DocumentMetadata("Ficha.pdf", "", "PDF", 1), parameters=p1)
+
+    # Doc 2: Manual declara 1.5 x 45 cm
+    p2 = engine.extract_document_parameters("Manual.pdf", {1: "Dimensiones del implante: 1.5 x 45 cm"})
+    rep2 = DocumentReport(metadata=DocumentMetadata("Manual.pdf", "", "PDF", 1), parameters=p2)
+
+    cross_findings = engine.check_batch_consistency({"Ficha.pdf": rep1, "Manual.pdf": rep2})
+    assert any("Descalce en Dimensiones de Malla/Cinta Quirúrgica" in f.title for f in cross_findings)
+
+
+def test_cross_batch_sterilization_method_clash():
+    engine = CrossDocumentConsistencyEngine()
+    # Doc 1: Validación declara Óxido de Etileno
+    p1 = engine.extract_document_parameters("Val_EO.pdf", {1: "Esterilización validada mediante óxido de etileno (EO)."})
+    rep1 = DocumentReport(metadata=DocumentMetadata("Val_EO.pdf", "", "PDF", 1), parameters=p1)
+
+    # Doc 2: Rótulo declara Radiación Gamma
+    p2 = engine.extract_document_parameters("Rotulo.pdf", {1: "Sterilized using Gamma radiation."})
+    rep2 = DocumentReport(metadata=DocumentMetadata("Rotulo.pdf", "", "PDF", 1), parameters=p2)
+
+    cross_findings = engine.check_batch_consistency({"Val_EO.pdf": rep1, "Rotulo.pdf": rep2})
+    assert any("Contradicción Crítica en Método de Esterilización" in f.title for f in cross_findings)
+
+
+def test_cross_batch_material_clash():
+    engine = CrossDocumentConsistencyEngine()
+    # Doc 1: Ficha declara Poliuretano
+    p1 = engine.extract_document_parameters("Ficha.pdf", {1: "Materia prima principal: Poliuretano grado médico."})
+    rep1 = DocumentReport(metadata=DocumentMetadata("Ficha.pdf", "", "PDF", 1), parameters=p1)
+
+    # Doc 2: CER declara Polipropileno
+    p2 = engine.extract_document_parameters("CER.pdf", {1: "Device body manufactured from polypropylene."})
+    rep2 = DocumentReport(metadata=DocumentMetadata("CER.pdf", "", "PDF", 1), parameters=p2)
+
+    cross_findings = engine.check_batch_consistency({"Ficha.pdf": rep1, "CER.pdf": rep2})
+    assert any("Inconsistencia Crítica en la Materia Prima" in f.title for f in cross_findings)
+
+
 if __name__ == "__main__":
     pytest.main(["-v", __file__])

@@ -76,7 +76,9 @@ class DigemidDocumentAuditor:
 
                 # C. Reglas estructurales, celdas vacías y anexos (Catálogo B)
                 doc_findings.extend(
-                    self.structure_rules.analyze_document(doc_name, pages_text, tables, all_doc_names)
+                    self.structure_rules.analyze_document(
+                        doc_name, pages_text, tables, all_doc_names, total_pages=meta.total_pages
+                    )
                 )
 
                 # D. Contradicciones internas en el propio documento (Catálogo C.1)

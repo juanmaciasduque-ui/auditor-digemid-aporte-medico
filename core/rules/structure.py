@@ -20,7 +20,8 @@ class StructureIntegrityRules:
         document_name: str,
         pages_text: Dict[int, str],
         tables_data: List[Dict[str, Any]],
-        all_document_names: Set[str] = None
+        all_document_names: Set[str] = None,
+        total_pages: int = None
     ) -> List[Finding]:
         findings: List[Finding] = []
         all_docs = all_document_names or set()
@@ -38,6 +39,9 @@ class StructureIntegrityRules:
 
         # 4. Numeración desordenada de secciones
         findings.extend(self._check_section_numbering(document_name, pages_text))
+
+        # 5. Foliación declarada vs páginas reales del archivo (Páginas faltantes)
+        findings.extend(self._check_page_count_discrepancy(document_name, pages_text, total_pages))
 
         return findings
 
@@ -275,5 +279,76 @@ class StructureIntegrityRules:
                             ))
                             break
                     prev_main = curr_main
+
+        return findings
+
+    def _check_page_count_discrepancy(
+        self,
+        doc_name: str,
+        pages_text: Dict[int, str],
+        total_pages: int = None
+    ) -> List[Finding]:
+        """Detecta discrepancias entre la foliación declarada en el pie de página y las páginas reales del archivo."""
+        findings = []
+        actual_pages = total_pages if total_pages is not None else len(pages_text)
+        if actual_pages == 0:
+            return findings
+
+        declared_totals = set()
+        samples = []
+        for p_num, text in pages_text.items():
+            matches = re.finditer(
+                r'\b(?:P[aá]gina|P[aá]g\.?|Page)\s*[:\-_]?\s*(\d+)\s*(?:de|of|\/)\s*(\d+)\b',
+                text,
+                re.IGNORECASE
+            )
+            for m in matches:
+                curr_p = int(m.group(1))
+                dec_total = int(m.group(2))
+                declared_totals.add(dec_total)
+                samples.append((p_num, m.group(0), curr_p, dec_total))
+
+        for dec_total in declared_totals:
+            if dec_total > actual_pages and abs(dec_total - actual_pages) >= 1:
+                # Faltan páginas físicas en el documento digital
+                first_sample = next(s for s in samples if s[3] == dec_total)
+                findings.append(Finding(
+                    id=f"STR_MISSING_PAGES_{doc_name}",
+                    document_name=doc_name,
+                    page=first_sample[0],
+                    severity=Severity.FATAL,
+                    category=Category.VISUAL_STRUCTURE,
+                    title="Foliación Incompleta: Páginas Faltantes en el Documento Digital",
+                    description=(
+                        f"El pie de página declara '{first_sample[1]}' indicando un total de {dec_total} páginas, "
+                        f"pero el archivo digital únicamente contiene {actual_pages} páginas. "
+                        f"Se han omitido físicamente {dec_total - actual_pages} página(s). DIGEMID rechaza de plano "
+                        "cualquier expediente presentado con documentos incompletos o truncados (Art. 130 D.S. 016-2011-SA)."
+                    ),
+                    detected_text=f"Declarado: {first_sample[1]} vs Páginas Reales del Archivo: {actual_pages}",
+                    expected_text=f"Archivo íntegro con las {dec_total} páginas completas",
+                    digemid_norm_ref="D.S. 016-2011-SA Art. 130° / Ley N° 29459",
+                    remediation_advice="Solicitar al fabricante o escanear el documento íntegro con todas sus páginas correlativas.",
+                ))
+            elif actual_pages > dec_total and (actual_pages - dec_total) >= 2:
+                # Hay más páginas que las declaradas en el pie de página
+                first_sample = next(s for s in samples if s[3] == dec_total)
+                findings.append(Finding(
+                    id=f"STR_PAGE_COUNT_MISMATCH_{doc_name}",
+                    document_name=doc_name,
+                    page=first_sample[0],
+                    severity=Severity.CRITICAL,
+                    category=Category.VISUAL_STRUCTURE,
+                    title="Descalce en Foliación Declarada vs Páginas Reales del Archivo",
+                    description=(
+                        f"El pie de página declara '{first_sample[1]}' ({dec_total} páginas), "
+                        f"mientras que el archivo contiene {actual_pages} páginas. La foliación está desfasada "
+                        "o se incorporaron anexos/hojas adicionales sin actualizar el pie de página."
+                    ),
+                    detected_text=f"Pie de página: {first_sample[1]} vs Total de páginas en PDF: {actual_pages}",
+                    expected_text=f"Pie de página actualizado a 'Página X de {actual_pages}'",
+                    digemid_norm_ref="D.S. 016-2011-SA Art. 130°",
+                    remediation_advice="Revisar y armonizar la foliación del documento para que coincida con el total de páginas.",
+                ))
 
         return findings

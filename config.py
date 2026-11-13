@@ -1,6 +1,6 @@
 """
-Configuración global y banco de reglas maestras para el Auditor Documental DIGEMID.
-Caso Base: Aporte Médico Perú S.A.C. / ACE Medical Devices Pvt. Ltd. (Catéteres Ureterales Doble J).
+Configuración global, perfiles de dispositivos médicos y marco regulatorio DIGEMID.
+Soporte UNIVERSAL para cualquier dispositivo médico o producto sanitario (Clases I, II, III, IV).
 """
 
 from pathlib import Path
@@ -8,23 +8,84 @@ from typing import Dict, List, Any
 
 # Rutas del entorno local
 DEFAULT_TEST_DATA_DIR = Path(r"G:\Mi unidad\PC\APORTE PERU\INFORMACION DISPOSITIVOS\Documentos Cateter")
+VAGINAL_SLING_DATA_DIR = Path(r"G:\Mi unidad\PC\APORTE PERU\INFORMACION DISPOSITIVOS\Documentos Cinta Vaginal de libre tensión")
 REPORTS_DIR = Path(__file__).parent / "reports"
 
-# Parámetros Oficiales del Caso Base
+# Parámetros Oficiales del Titular Solicitante por Defecto
 BASE_CASE_INFO = {
     "titular": "APORTE MÉDICO PERÚ S.A.C.",
     "ruc_titular": "20610321268",
     "pais_titular": "Perú",
-    "fabricante": "ACE Medical Devices Pvt. Ltd.",
-    "direccion_planta": "401A, Gera 77, East Avenue, Kalyani Nagar, Pune 411006, India",
-    "producto": "Catéteres Ureterales (Doble J / Stent Ureteral y Set)",
-    "clasificacion_riesgo": "Clase III (Dispositivo invasivo quirúrgico de uso prolongado/implante)",
-    "expedientes_rechazados": ["25039778", "25157794"],
-    "resolucion_denegatoria": "R.D. N° 4453-2026",
-    "notificacion_oficial": "Notificación N° 2026068505 (13/03/2026)",
+    "direccion_titular": "Lima, Perú",
+    "fabricante": "ACE Medical Devices Pvt. Ltd. / Orion Surgichem",
+    "producto": "Dispositivo Médico para Registro Sanitario DIGEMID",
+    "clasificacion_riesgo": "Clase I, II, III o IV según D.S. 016-2011-SA",
 }
 
-# Matriz Maestra Dimensional y Clínica Válida
+# Familias de Productos Médicos Regulados ante DIGEMID
+PRODUCT_FAMILIES = {
+    "UNIVERSAL": {
+        "nombre": "🎯 Detección Automática Universal (Cualquier Dispositivo DIGEMID)",
+        "descripcion": "Aplica reglas regulatorias transversales según D.S. 016-2011-SA para cualquier clase de riesgo (I, II, III, IV).",
+        "clase_defecto": "Clase I / II / III / IV",
+        "norma_base": "D.S. 016-2011-SA Arts. 126°, 128°, 129°, 130°, 137°",
+    },
+    "URETERAL_STENTS": {
+        "nombre": "Catéteres y Stents Urológicos (Doble J, Mono J, Sets)",
+        "descripcion": "Dispositivos invasivos urológicos de drenaje interno (Clase III / IIb).",
+        "clase_defecto": "Clase III",
+        "unidades_esperadas": ["Fr", "cm"],
+        "rango_fr_tipico": (2.0, 12.0),
+        "rango_cm_tipico": (6.0, 32.0),
+        "longitudes_prohibidas": [(70.0, 90.0, "Catéter Ureteral simple (no Doble J)")],
+        "materiales": ["Poliuretano", "Silicona"],
+        "vida_util_esperada": [36, 60],
+        "norma_base": "Art. 130° D.S. 016-2011-SA",
+    },
+    "VAGINAL_SLINGS_MESHES": {
+        "nombre": "Cintas Vaginales (TOT / TVT) y Mallas Quirúrgicas Pélvicas",
+        "descripcion": "Mallas e implantes permanentes de suspensión para corrección de incontinencia urinaria y prolapso (Clase III).",
+        "clase_defecto": "Clase III (Implante Permanente)",
+        "unidades_esperadas": ["cm x cm", "mm x mm", "g/m2"],
+        "materiales": ["Polipropileno monofilamento macroporoso"],
+        "tiempo_permanencia_tipico": "Permanente (> 30 días / implante definitivo)",
+        "vida_util_esperada": [36, 60],
+        "norma_base": "Art. 130° D.S. 016-2011-SA / Ensayos ISO 10993 completos",
+    },
+    "ELECTROSURGICAL_LOOPS": {
+        "nombre": "Asas de Resección Endoscópica y Electrodos Quirúrgicos",
+        "descripcion": "Instrumental y accesorios de electrocirugía urológica/ginecológica (Clase IIb / III).",
+        "clase_defecto": "Clase IIb / III",
+        "unidades_esperadas": ["Fr", "mm", "grados ángulo"],
+        "materiales": ["Tungsteno", "Acero inoxidable", "Aislamiento cerámico/PTFE"],
+        "norma_base": "Art. 129° / 130° D.S. 016-2011-SA",
+    },
+    "IV_CATHETERS_INFUSION": {
+        "nombre": "Catéteres Intravenosos, Equipos de Venoclisis y Cánulas",
+        "descripcion": "Dispositivos de acceso vascular y terapia de infusión (Clase IIa / IIb).",
+        "clase_defecto": "Clase IIa",
+        "unidades_esperadas": ["Gauge (G)", "mm", "ml/min"],
+        "materiales": ["FEP", "Poliuretano", "PVC grado médico libre de DEHP"],
+        "norma_base": "Art. 129° D.S. 016-2011-SA",
+    },
+    "SURGICAL_SUTURES": {
+        "nombre": "Suturas Quirúrgicas e Implantes de Fijación",
+        "descripcion": "Material de sutura absorbible y no absorbible (Clase IIb / III).",
+        "clase_defecto": "Clase IIb / III",
+        "unidades_esperadas": ["USP", "EP", "cm longitud hilo", "mm aguja"],
+        "materiales": ["Ácido poliglicólico", "Poliglactina", "Polidioxanona", "Seda", "Nylon"],
+        "norma_base": "Art. 130° D.S. 016-2011-SA",
+    },
+    "DISPOSABLES_GLOVES": {
+        "nombre": "Guantes Quirúrgicos, Jeringas y Material Descartable",
+        "descripcion": "Material médico de curación y protección biológica (Clase I / IIa).",
+        "clase_defecto": "Clase I / IIa",
+        "unidades_esperadas": ["ml", "Gauge", "tallas XS-XL"],
+        "norma_base": "Art. 128° / 129° D.S. 016-2011-SA",
+    },
+}
+
+# Matriz Maestra Dimensional y Clínica Válida (Caso Base Doble J)
 MASTER_SPECIFICATIONS = {
     "valid_diameters_fr": (2.0, 12.0),
     "typical_diameters_fr": (3.0, 8.0),
@@ -90,7 +151,7 @@ STANDARDS_COMPLIANCE_MAP = {
     },
 }
 
-# Catálogo de Traducciones Absurdas y Errores Léxicos
+# Catálogo de Traducciones Absurdas y Errores Léxicos Transversales
 ABSURD_TRANSLATIONS = {
     "no debe mantenerse mora": {
         "origen": "do not delay / not to be kept indwelling",
@@ -154,30 +215,46 @@ ABSURD_TRANSLATIONS = {
     },
 }
 
-# Referencias Normativas de DIGEMID
+# Referencias Normativas de DIGEMID según Clase de Riesgo
 DIGEMID_LEGAL_FRAMEWORK = {
-    "DS_016_2011_SA_ART_130": {
-        "articulo": "D.S. 016-2011-SA, Artículo 130°",
-        "descripcion": "Requisitos técnicos para inscripción de dispositivos médicos Clase III: Informe Técnico detallado, materias primas, estudios de estabilidad, validación de esterilización, flujograma con descripción resumida de etapas.",
-    },
     "DS_016_2011_SA_ART_126": {
         "articulo": "D.S. 016-2011-SA, Artículo 126°",
-        "descripcion": "Carta de Autorización del Fabricante detallando facultades, modelos, códigos y concordancia íntegra con el Certificado de Libre Venta (CLV).",
+        "clase": "Universal (Clases I, II, III, IV)",
+        "descripcion": "Carta de Autorización del Fabricante detallando facultades exclusivas, marcas, modelos, códigos y concordancia íntegra con el Certificado de Libre Venta (CLV) y RUC del titular en Perú.",
+    },
+    "DS_016_2011_SA_ART_128": {
+        "articulo": "D.S. 016-2011-SA, Artículo 128°",
+        "clase": "Clase I (Bajo Riesgo)",
+        "descripcion": "Requisitos para dispositivos Clase I: Certificado de Libre Venta, Certificado BPM/ISO 13485, especificaciones técnicas y proyectos de rotulado.",
+    },
+    "DS_016_2011_SA_ART_129": {
+        "articulo": "D.S. 016-2011-SA, Artículo 129°",
+        "clase": "Clase II (Moderado Riesgo)",
+        "descripcion": "Requisitos para dispositivos Clase II: Añade flujograma de fabricación, validación de esterilización (si aplica) y estudios de estabilidad.",
+    },
+    "DS_016_2011_SA_ART_130": {
+        "articulo": "D.S. 016-2011-SA, Artículo 130°",
+        "clase": "Clase III y IV (Alto Riesgo e Implantes)",
+        "descripcion": "Informe Técnico detallado con fórmula cuali-cuantitativa de materias primas, flujograma con descripción resumida de etapas, estudios de estabilidad, validación de esterilización con residuales, evaluación clínica (CER) firmada por médico y batería de biocompatibilidad completa ISO 10993.",
+    },
+    "DS_016_2011_SA_ART_137": {
+        "articulo": "D.S. 016-2011-SA, Artículo 137°",
+        "clase": "Universal (Clases I, II, III, IV)",
+        "descripcion": "Rotulados e IFU: Todo texto de advertencias, contraindicaciones y modo de uso debe estar obligatoriamente en idioma español, con RUC del titular en Perú.",
     },
     "DS_003_2020_SA": {
         "articulo": "D.S. 003-2020-SA",
-        "descripcion": "Principios Esenciales de Seguridad y Desempeño (GSPR) para dispositivos médicos en Perú, alineado a directrices IMDRF/GHTF.",
+        "clase": "Universal (Clases I, II, III, IV)",
+        "descripcion": "Lista de Principios Esenciales de Seguridad y Desempeño (GSPR) para dispositivos médicos en Perú, alineado a directrices IMDRF/GHTF.",
     },
     "DS_014_2011_SA": {
         "articulo": "D.S. 014-2011-SA",
+        "clase": "Universal",
         "descripcion": "Reglamento de Establecimientos Farmacéuticos: BPA, horario de permanencia de Dirección Técnica y trazabilidad de almacenamiento.",
     },
     "LEY_29459": {
         "articulo": "Ley N° 29459, Arts. 5°, 8°, 10°, 12°, 44°-52°",
-        "descripcion": "Ley de Productos Farmacéuticos, Dispositivos Médicos y Productos Sanitarios. Responsabilidad objetiva y veracidad documental.",
-    },
-    "LEY_27444_ART_34": {
-        "articulo": "TUO Ley N° 27444, Art. 34° y Código Penal Arts. 411° y 427°",
-        "descripcion": "Privilegio de controles posteriores y fiscalización: Prohibición expresa de adulteración, montaje de firmas o alteración de fechas en informes oficiales.",
+        "clase": "Universal",
+        "descripcion": "Ley de Productos Farmacéuticos, Dispositivos Médicos y Productos Sanitarios. Responsabilidad objetiva del titular por veracidad y calidad.",
     },
 }
