@@ -199,12 +199,25 @@ class BatchAuditResult:
         return sum(1 for f in self.all_findings if f.severity == Severity.MINOR)
 
     @property
+    def has_non_regulatory_docs(self) -> bool:
+        """Determina si el lote contiene documentos ajenos o no pertinentes."""
+        return any(
+            "Documento No Pertinente" in f.title or 
+            "Sin Pertinencia Regulatoria" in f.title or 
+            "Lote Documental Inválido" in f.title
+            for f in self.all_findings
+        )
+
+    @property
     def rejection_probability_pct(self) -> float:
         """
         Calcula la probabilidad objetiva de denegatoria ante DIGEMID:
+        - Si contiene documentos ajenos (CV, facturas, cuentas de cobro): 100% de rechazo.
         - Si hay al menos 1 hallazgo FATAL, la probabilidad es >= 95%.
         - Si hay hallazgos CRÍTICOS (observaciones de subsanación), cada uno añade peso.
         """
+        if self.has_non_regulatory_docs:
+            return 100.0
         if self.total_fatal > 0:
             prob = 90.0 + min(10.0, self.total_fatal * 2.0)
             return round(min(100.0, prob), 1)
@@ -217,6 +230,8 @@ class BatchAuditResult:
 
     @property
     def verdict(self) -> str:
+        if self.has_non_regulatory_docs:
+            return "NO APTO: EXPEDIENTE INVÁLIDO / DOCUMENTOS AJENOS A DIGEMID"
         if self.total_fatal > 0:
             return "NO APTO PARA PRESENTACIÓN (DENEGATORIA INMINENTE)"
         if self.total_critical > 0:

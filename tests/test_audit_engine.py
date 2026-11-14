@@ -277,5 +277,73 @@ def test_cross_batch_material_clash():
     assert any("Inconsistencia Crítica en la Materia Prima" in f.title for f in cross_findings)
 
 
+# ==============================================================================
+# PRUEBAS DE PERTINENCIA DOCUMENTAL (HOJA DE VIDA, FACTURAS, TEXTOS AJENOS)
+# ==============================================================================
+
+def test_cv_resume_detected_as_fatal():
+    rules = DigemidLegalRules()
+    cv_text = """
+    CURRICULUM VITAE
+    Carlos Alberto Gómez - Ingeniero Biomédico
+    Perfil Profesional: Especialista con 8 años de experiencia laboral en mantenimiento hospitalario.
+    Formación Académica: Universidad de los Andes.
+    Referencias Laborales: Disponibles a solicitud.
+    """
+    findings = rules.analyze_document("Hoja_de_Vida_Carlos.pdf", {1: cv_text})
+    assert any("Infiltración de Hoja de Vida / Currículum Vitae" in f.title for f in findings)
+    assert any(f.severity.value == "FATAL" for f in findings)
+
+
+def test_invoice_bill_detected_as_fatal():
+    rules = DigemidLegalRules()
+    bill_text = """
+    CUENTA DE COBRO N° 102
+    Aporte Médico Perú S.A.C.
+    DEBE A: Juan Fernando Pérez
+    LA SUMA DE: $ 4.500.000 COP
+    POR CONCEPTO DE: Honorarios profesionales por asesoría contable mes de marzo.
+    Consignar a la Cuenta de Ahorros Bancolombia N° 987654321.
+    """
+    findings = rules.analyze_document("Cuenta_de_Cobro_Marzo.pdf", {1: bill_text})
+    assert any("Factura / Cuenta de Cobro Comercial Infiltrada" in f.title for f in findings)
+    assert any(f.severity.value == "FATAL" for f in findings)
+
+
+def test_irrelevant_generic_text_detected_as_fatal():
+    rules = DigemidLegalRules()
+    random_text = """
+    El informe meteorológico indica que las lluvias continuarán en la región norte durante el fin de semana.
+    Las autoridades recomiendan tomar precauciones viales y mantener limpios los canales de drenaje.
+    """
+    findings = rules.analyze_document("Informe_Clima.pdf", {1: random_text})
+    assert any("Documento Sin Pertinencia Regulatoria" in f.title for f in findings)
+    assert any(f.severity.value == "FATAL" for f in findings)
+
+
+def test_batch_all_irrelevant_documents_verdict():
+    from core.models import BatchAuditResult
+    rules = DigemidLegalRules()
+    engine = CrossDocumentConsistencyEngine()
+
+    doc1_text = "Hoja de Vida. Experiencia laboral en marketing y ventas. Formación académica."
+    doc2_text = "Cuenta de cobro por concepto de diseño gráfico. Valor a pagar $500."
+
+    f1 = rules.analyze_document("CV.pdf", {1: doc1_text})
+    p1 = engine.extract_document_parameters("CV.pdf", {1: doc1_text})
+    rep1 = DocumentReport(metadata=DocumentMetadata("CV.pdf", "", "PDF", 1), parameters=p1, findings=f1)
+
+    f2 = rules.analyze_document("Cobro.pdf", {1: doc2_text})
+    p2 = engine.extract_document_parameters("Cobro.pdf", {1: doc2_text})
+    rep2 = DocumentReport(metadata=DocumentMetadata("Cobro.pdf", "", "PDF", 1), parameters=p2, findings=f2)
+
+    batch_findings = engine.check_batch_consistency({"CV.pdf": rep1, "Cobro.pdf": rep2})
+    batch_result = BatchAuditResult(documents={"CV.pdf": rep1, "Cobro.pdf": rep2}, cross_findings=batch_findings)
+
+    assert batch_result.total_fatal >= 2
+    assert batch_result.rejection_probability_pct == 100.0
+    assert "NO APTO: EXPEDIENTE INVÁLIDO" in batch_result.verdict
+
+
 if __name__ == "__main__":
     pytest.main(["-v", __file__])

@@ -611,4 +611,31 @@ class CrossDocumentConsistencyEngine:
                             remediation_advice="Uniformar el calibre de aguja/trocar en la ficha técnica y manual.",
                         ))
 
+        # 10. Validación de Integridad Mínima del Lote Regulatorio
+        if doc_reports:
+            has_valid_medical_doc = any(
+                not any("Documento No Pertinente" in f.title or "Sin Pertinencia Regulatoria" in f.title for f in r.findings)
+                for r in doc_reports.values()
+            )
+            if not has_valid_medical_doc:
+                cross_findings.append(Finding(
+                    id="CROSS_BATCH_NO_REGULATORY_DOCS",
+                    document_name="Lote Completo de Documentos",
+                    page=None,
+                    severity=Severity.FATAL,
+                    category=Category.CROSS_DOCUMENT,
+                    title="Lote Documental Inválido: Ningún Documento Pertenece a un Trámite DIGEMID",
+                    description=(
+                        "Ninguno de los archivos cargados en este lote corresponde a documentación técnica, "
+                        "clínica, analítica ni legal de un dispositivo médico bajo el D.S. 016-2011-SA. "
+                        "El lote está compuesto exclusivamente por documentos ajenos (hojas de vida, facturas, "
+                        "cuentas de cobro o textos no médicos). La presentación de este lote ante DIGEMID / VUCE "
+                        "resultará en rechazo de plano o inadmisibilidad."
+                    ),
+                    detected_text="0 documentos regulatorios válidos en el lote evaluado",
+                    expected_text="Expediente técnico con Informe Técnico, Ficha Técnica, Rótulos, IFU y validaciones según D.S. 016-2011-SA",
+                    digemid_norm_ref="D.S. 016-2011-SA Art. 128°, 129° y 130° / TUPA DIGEMID",
+                    remediation_advice="Cargar los archivos oficiales del expediente técnico del dispositivo médico a registrar.",
+                ))
+
         return cross_findings

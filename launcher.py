@@ -9,6 +9,7 @@ Lanzador Inteligente para el Auditor Forense Documental DIGEMID.
 import sys
 import os
 import time
+import socket
 import subprocess
 import webbrowser
 import urllib.request
@@ -31,7 +32,17 @@ def show_info_box(message: str, title: str = "Auditor DIGEMID"):
     ctypes.windll.user32.MessageBoxW(0, message, title, 0x40)
 
 
-def is_server_running(url: str, timeout: float = 1.0) -> bool:
+def is_port_bound(port: int) -> bool:
+    """Verificación ultrarrápida (0.001s) de disponibilidad del puerto TCP."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.1)
+            return s.connect_ex(('127.0.0.1', port)) == 0
+    except Exception:
+        return False
+
+
+def is_server_running(url: str, timeout: float = 0.3) -> bool:
     """Verifica si el servidor Streamlit ya está respondiendo peticiones HTTP."""
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "AuditorLauncher/1.0"})
@@ -42,7 +53,7 @@ def is_server_running(url: str, timeout: float = 1.0) -> bool:
 
 
 def kill_process_on_port(port: int):
-    """Busca y termina cualquier proceso residual que esté ocupando el puerto."""
+    """Termina de inmediato cualquier proceso colgado que esté ocupando el puerto."""
     try:
         output = subprocess.check_output(f"netstat -ano | findstr :{port}", shell=True, text=True)
         for line in output.strip().splitlines():
@@ -51,7 +62,7 @@ def kill_process_on_port(port: int):
                 pid = parts[-1]
                 if pid.isdigit() and int(pid) != os.getpid():
                     subprocess.call(f"taskkill /F /PID {pid}", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        time.sleep(1.0)
+        time.sleep(0.3)
     except Exception:
         pass
 
@@ -59,15 +70,19 @@ def kill_process_on_port(port: int):
 def main():
     os.chdir(SCRIPT_DIR)
 
-    # 1. Verificar si ya hay una instancia activa y respondiendo
-    if is_server_running(URL):
-        webbrowser.open(URL)
-        sys.exit(0)
+    # 1. Verificación instantánea: Si ya está en ejecución activa, abrir navegador en 0.05s y salir
+    if is_port_bound(PORT):
+        if is_server_running(URL, timeout=0.4):
+            try:
+                webbrowser.open(URL)
+            except Exception:
+                subprocess.call(f'start {URL}', shell=True)
+            sys.exit(0)
+        else:
+            # Puerto ocupado por proceso muerto/colgado: liberarlo
+            kill_process_on_port(PORT)
 
-    # 2. Si el puerto está bloqueado por un proceso colgado, limpiarlo
-    kill_process_on_port(PORT)
-
-    # 3. Asegurar que nunca solicite email en consola interactiva (evita bloqueos silenciosos)
+    # 2. Asegurar que nunca solicite email en consola interactiva (evita bloqueos silenciosos)
     user_cred = Path.home() / ".streamlit" / "credentials.toml"
     if not user_cred.exists():
         try:
@@ -84,7 +99,7 @@ def main():
         except Exception:
             pass
 
-    # 4. Lanzar Streamlit con parámetros de red y apertura automática de navegador
+    # 3. Lanzar Streamlit optimizado
     env = os.environ.copy()
     env["PYTHONUNBUFFERED"] = "1"
     env["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] = "false"
@@ -94,7 +109,7 @@ def main():
         "-m", "streamlit", "run",
         str(APP_FILE),
         f"--server.port={PORT}",
-        "--server.address=0.0.0.0", # Permite acceso tanto local como desde la red de la oficina
+        "--server.address=0.0.0.0",
         "--server.headless=true",
         "--browser.gatherUsageStats=false",
         "--browser.serverAddress=localhost",
@@ -111,11 +126,11 @@ def main():
         show_error_box(f"No se pudo iniciar el proceso de Python/Streamlit:\n\n{e}")
         sys.exit(1)
 
-    # 5. Esperar a que el servidor responda y abrir el navegador exactamente una vez
+    # 4. Sondeo ultrarrápido (cada 150ms): en cuanto el puerto responda, abrir navegador
     opened = False
-    for _ in range(40): # Esperar hasta 20 segundos
-        time.sleep(0.5)
-        if is_server_running(URL):
+    for _ in range(50): # Esperar hasta 7.5 segundos con chequeo rápido
+        time.sleep(0.15)
+        if is_port_bound(PORT):
             try:
                 webbrowser.open(URL)
             except Exception:
@@ -123,18 +138,16 @@ def main():
             opened = True
             break
         if proc.poll() is not None:
-            # El proceso murió antes de iniciar
             show_error_box(f"El Auditor finalizó inesperadamente con código {proc.returncode}.\nVerifique que las dependencias estén instaladas.")
             sys.exit(1)
 
     if not opened:
-        # Intento de apertura directa de respaldo
         try:
             webbrowser.open(URL)
         except Exception:
             subprocess.call(f'start {URL}', shell=True)
 
-    # Mantener el lanzador esperando al proceso hijo
+    # Mantener el proceso activo en segundo plano
     try:
         proc.wait()
     except KeyboardInterrupt:

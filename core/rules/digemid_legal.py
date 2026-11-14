@@ -21,6 +21,9 @@ class DigemidLegalRules:
 
         full_text = " ".join(pages_text.values())
 
+        # 0. Verificación de Pertinencia Documental Regulatoria (D.S. 016-2011-SA / TUPA DIGEMID)
+        findings.extend(self._check_document_relevance(document_name, pages_text, full_text))
+
         # 1. Autorización dirigida a Colombia / Aporte Médico S.A.S. en vez de Perú
         findings.extend(self._check_colombia_sas_in_peru_filing(document_name, pages_text))
 
@@ -38,6 +41,111 @@ class DigemidLegalRules:
 
         # 6. Dirección de fabricante desactualizada (Neptune Society vs 401A Gera 77)
         findings.extend(self._check_manufacturer_address(document_name, pages_text))
+
+        return findings
+
+    def _check_document_relevance(self, doc_name: str, pages_text: Dict[int, str], full_text: str) -> List[Finding]:
+        """
+        Valida que el archivo subido sea pertinente para un trámite de registro sanitario ante DIGEMID.
+        Detecta e invalida archivos ajenos como:
+        - Hojas de Vida / Currículum Vitae (CV)
+        - Cuentas de Cobro / Facturas / Comprobantes de pago contables
+        - Documentos administrativos ajenos o textos genéricos sin contenido médico-sanitario
+        """
+        findings = []
+        clean_text = full_text.strip()
+
+        # 1. Detección específica de Hoja de Vida / Currículum Vitae
+        cv_match = re.search(
+            r'\b(?:hoja\s+de\s+vida|curriculum\s+vitae|curr[ií]culum|experiencia\s+laboral|'
+            r'formaci[oó]n\s+acad[eé]mica|perfil\s+profesional|referencias\s+(?:laborales|personales|familiares))\b',
+            clean_text,
+            re.IGNORECASE
+        )
+        if cv_match:
+            findings.append(Finding(
+                id=f"LEG_IRRELEVANT_CV_{doc_name}",
+                document_name=doc_name,
+                page=1,
+                severity=Severity.FATAL,
+                category=Category.DIGEMID_NORMATIVE,
+                title="Documento No Pertinente: Infiltración de Hoja de Vida / Currículum Vitae",
+                description=(
+                    f"El archivo '{doc_name}' corresponde a una Hoja de Vida o Currículum Vitae personal "
+                    f"('{cv_match.group(0)}') y no a documentación técnica, analítica, clínica ni legal exigible "
+                    "para el registro sanitario de un dispositivo médico bajo el D.S. 016-2011-SA. "
+                    "La radicación de hojas de vida sueltas o documentos de recursos humanos en la plataforma VUCE "
+                    "constituye causal de observación y entorpece la calificación del expediente ante DIGEMID."
+                ),
+                detected_text=f"Contenido detectado: {cv_match.group(0)} (Hoja de Vida / Datos Personales / Laborales)",
+                expected_text="Documento reglamentario de dispositivo médico (Informe Técnico, Ficha Técnica, IFU, Rotulado, etc.)",
+                digemid_norm_ref="D.S. 016-2011-SA Art. 126° y 130° / TUPA DIGEMID",
+                remediation_advice="Eliminar este archivo del paquete documental. Solo deben incluirse documentos técnicos y legales del dispositivo.",
+            ))
+            return findings
+
+        # 2. Detección específica de Cuentas de Cobro / Facturas Comerciales / Comprobantes de Pago
+        bill_match = re.search(
+            r'\b(?:cuenta\s+de\s+cobro|factura\s+(?:de\s+venta|electr[oó]nica)|recibo\s+por\s+honorarios|'
+            r'comprobante\s+de\s+pago|orden\s+de\s+compra|valor\s+a\s+pagar|por\s+concepto\s+de|'
+            r'cuenta\s+de\s+ahorros|cuenta\s+corriente\s+no\.?|consignar\s+a|honorarios\s+profesionales)\b',
+            clean_text,
+            re.IGNORECASE
+        )
+        if bill_match:
+            findings.append(Finding(
+                id=f"LEG_IRRELEVANT_BILL_{doc_name}",
+                document_name=doc_name,
+                page=1,
+                severity=Severity.FATAL,
+                category=Category.DIGEMID_NORMATIVE,
+                title="Documento No Pertinente: Factura / Cuenta de Cobro Comercial Infiltrada",
+                description=(
+                    f"El archivo '{doc_name}' corresponde a un comprobante contable o comercial "
+                    f"('{bill_match.group(0)}') y no forma parte de los requisitos sanitarios exigidos por DIGEMID. "
+                    "Los comprobantes de pago comerciales y cuentas de cobro no deben incorporarse en el expediente "
+                    "técnico de registro de dispositivos médicos ante VUCE."
+                ),
+                detected_text=f"Contenido detectado: {bill_match.group(0)} (Comprobante contable / Factura / Cuenta de cobro)",
+                expected_text="Documentación técnica y analítica del dispositivo médico bajo D.S. 016-2011-SA",
+                digemid_norm_ref="D.S. 016-2011-SA Art. 130° / TUPA DIGEMID",
+                remediation_advice="Retirar los comprobantes contables del expediente regulatorio.",
+            ))
+            return findings
+
+        # 3. Detección de texto genérico o ajeno sin ninguna relevancia médica / regulatoria
+        if len(clean_text) > 40:
+            medical_matches = re.findall(
+                r'\b(?:dispositiv[oa]s?|m[eé]dic[oa]s?|sanitari[oa]s?|farmac[eé]utic[oa]s?|cl[ií]nic[oa]s?|'
+                r'quir[uú]rgic[oa]s?|pacientes?|terap[eé]utic[oa]s?|cat[eé]teres?|stents?|mallas?|cintas?|'
+                r'suturas?|jeringas?|agujas?|implantes?|digemid|vuce|tupa|d\.s\.?\s*016|iso\s*\d+|bpm|gmp|'
+                r'ce\s*mark|esteril(?:izaci[oó]n|idad)?|sterile|biocompatib\w+|citotox\w+|lotes?|batch|'
+                r'shelf\s*life|vida\s*[uú]til|rotulad[oa]|r[oó]tulo|etiqueta|empaque|bl[ií]ster|fabricante|manufacturer|'
+                r'indwelling|ensayos?|laboratorio|calibre|gauges?|in\s*vitro|importad[oa]s?|distribuid[oa]s?|'
+                r'titular|ruc\b|dismed|teleandes|aporte\s+m[eé]dico|registro\s+sanitario)\b',
+                clean_text,
+                re.IGNORECASE
+            )
+            if len(medical_matches) == 0:
+                snippet = clean_text[:120].replace('\n', ' ')
+                findings.append(Finding(
+                    id=f"LEG_NO_MEDICAL_RELEVANCE_{doc_name}",
+                    document_name=doc_name,
+                    page=1,
+                    severity=Severity.FATAL,
+                    category=Category.DIGEMID_NORMATIVE,
+                    title="Documento Sin Pertinencia Regulatoria para Registro Sanitario DIGEMID",
+                    description=(
+                        f"El archivo '{doc_name}' no contiene información técnica, clínica, analítica "
+                        "ni legal relacionada con un dispositivo médico. Carece de especificaciones, materias primas, "
+                        "datos de fabricante, lote o sustento regulatorio bajo el D.S. 016-2011-SA. "
+                        "Presentar archivos genéricos o ajenos en la ventanilla VUCE motiva la observación o denegatoria del trámite."
+                    ),
+                    detected_text=f"Muestra de texto: \"{snippet}...\" (0 términos médicos/regulatorios)",
+                    expected_text="Documento reglamentario válido de dispositivo médico (Art. 128°, 129° o 130° D.S. 016-2011-SA)",
+                    digemid_norm_ref="D.S. 016-2011-SA Arts. 128°, 129°, 130° / Ley N° 29459",
+                    remediation_advice="Verificar si se cargó el archivo equivocado y sustituirlo por el documento técnico o analítico correspondiente.",
+                ))
 
         return findings
 
