@@ -111,99 +111,31 @@ class ScientificTypoRules:
     def _check_iso_and_standards(self, doc_name: str, page_num: int, text: str) -> List[Finding]:
         findings = []
 
-        # 1. ISO 111737 (Typo común por ISO 11737-1)
-        if re.search(r'\bISO\s*111737\b', text, re.IGNORECASE):
-            findings.append(Finding(
-                id=f"STD_ISO_111737_{doc_name}_{page_num}",
-                document_name=doc_name,
-                page=page_num,
-                severity=Severity.CRITICAL,
-                category=Category.TYPOGRAPHY_SCIENTIFIC,
-                title="Cita de Norma ISO Inexistente (Error Tipográfico: ISO 111737)",
-                description=(
-                    "Se cita la norma 'ISO 111737', la cual no existe. El estándar internacional aplicable "
-                    "para bioburden y control microbiológico de esterilización es ISO 11737-1 e ISO 11737-2."
-                ),
-                detected_text="ISO 111737",
-                expected_text="ISO 11737-1 (Bioburden) / ISO 11737-2 (Esterilidad)",
-                digemid_norm_ref="D.S. 016-2011-SA Art. 130°",
-                remediation_advice="Corregir a ISO 11737-1 en todo el informe de esterilización.",
-            ))
-
-        # 2. ZSO 9001 (Error de OCR)
-        if re.search(r'\bZSO\s*9001\b', text, re.IGNORECASE):
-            findings.append(Finding(
-                id=f"STD_ZSO_9001_{doc_name}_{page_num}",
-                document_name=doc_name,
-                page=page_num,
-                severity=Severity.MINOR,
-                category=Category.TYPOGRAPHY_SCIENTIFIC,
-                title="Error de Lectura OCR / Digitalización Corrupta (ZSO 9001)",
-                description="Se detectó 'ZSO 9001:2015' generado por reconocimiento óptico corrupto de 'ISO 9001'.",
-                detected_text="ZSO 9001",
-                expected_text="ISO 9001:2015",
-                digemid_norm_ref="D.S. 016-2011-SA",
-                remediation_advice="Revisar el PDF para que el texto vectorial sea nítido y diga ISO 9001:2015.",
-            ))
-
-        # 3. Normas Derogadas
-        # ISO 14971:2012
-        if re.search(r'\bISO\s*14971\s*:\s*2012\b', text, re.IGNORECASE):
-            findings.append(Finding(
-                id=f"STD_DEROG_14971_{doc_name}_{page_num}",
-                document_name=doc_name,
-                page=page_num,
-                severity=Severity.CRITICAL,
-                category=Category.DIGEMID_NORMATIVE,
-                title="Uso de Norma Derogada en Gestión de Riesgos (ISO 14971:2012)",
-                description=(
-                    "El archivo cita ISO 14971:2012. Dicha versión fue derogada y sustituida por "
-                    "ISO 14971:2019 (+ Enmienda A11:2021). Presentar expedientes basados en normas "
-                    "desactualizadas motiva observaciones de DIGEMID bajo el D.S. 003-2020-SA."
-                ),
-                detected_text="ISO 14971:2012",
-                expected_text="ISO 14971:2019 / A11:2021",
-                digemid_norm_ref="D.S. 003-2020-SA / Principio Esencial 1 y 2",
-                remediation_advice="Actualizar la matriz de gestión del riesgo a ISO 14971:2019.",
-            ))
-
-        # MDD 93/42/EEC
-        if re.search(r'\b(?:MDD\s*93/42/EEC|93/42/CEE|Council\s+Directive\s+93/42)\b', text, re.IGNORECASE):
-            findings.append(Finding(
-                id=f"STD_DEROG_MDD_{doc_name}_{page_num}",
-                document_name=doc_name,
-                page=page_num,
-                severity=Severity.CRITICAL,
-                category=Category.DIGEMID_NORMATIVE,
-                title="Invocación de Directiva Europea Derogada (MDD 93/42/EEC)",
-                description=(
-                    "Se cita la Directiva MDD 93/42/EEC, la cual quedó derogada y reemplazada por el "
-                    "Reglamento de Dispositivos Médicos de la Unión Europea (UE) 2017/745 (EU MDR)."
-                ),
-                detected_text="MDD 93/42/EEC",
-                expected_text="Reglamento (UE) 2017/745 (EU MDR)",
-                digemid_norm_ref="D.S. 016-2011-SA / D.S. 003-2020-SA",
-                remediation_advice="Reemplazar referencias a MDD 93/42/EEC por EU MDR 2017/745.",
-            ))
-
-        # EN 980:2008
-        if re.search(r'\bEN\s*980(?:\s*:\s*2008)?\b', text, re.IGNORECASE):
-            findings.append(Finding(
-                id=f"STD_DEROG_EN980_{doc_name}_{page_num}",
-                document_name=doc_name,
-                page=page_num,
-                severity=Severity.CRITICAL,
-                category=Category.DIGEMID_NORMATIVE,
-                title="Cita de Norma Derogada de Símbolos de Rotulado (EN 980:2008)",
-                description=(
-                    "La norma EN 980 fue derogada y sustituida globalmente por ISO 15223-1 "
-                    "(Símbolos a utilizar en las etiquetas de los productos sanitarios)."
-                ),
-                detected_text="EN 980:2008",
-                expected_text="ISO 15223-1:2021",
-                digemid_norm_ref="D.S. 016-2011-SA Art. 137°",
-                remediation_advice="Actualizar la referencia en rótulos y manual IFU a ISO 15223-1:2021.",
-            ))
+        for std_name, info in STANDARDS_COMPLIANCE_MAP.items():
+            pattern = info.get("regex")
+            if not pattern:
+                continue
+            if re.search(pattern, text, re.IGNORECASE):
+                status = info["status"]
+                sev = Severity.MINOR if status == "ERROR OCR" else Severity.CRITICAL
+                cat = Category.TYPOGRAPHY_SCIENTIFIC if status in ("INEXISTENTE / TYPO", "ERROR OCR") else Category.DIGEMID_NORMATIVE
+                safe_id = re.sub(r'[^A-Za-z0-9]', '_', std_name)
+                findings.append(Finding(
+                    id=f"STD_{safe_id}_{doc_name}_{page_num}",
+                    document_name=doc_name,
+                    page=page_num,
+                    severity=sev,
+                    category=cat,
+                    title=f"Norma {status}: {std_name}",
+                    description=(
+                        f"Se detectó la referencia a '{std_name}' ({info['materia']}), clasificada como {status}. "
+                        f"La norma vigente aplicable ante DIGEMID es {info['vigente']}."
+                    ),
+                    detected_text=std_name,
+                    expected_text=info["vigente"],
+                    digemid_norm_ref=info["norma_peruana"],
+                    remediation_advice=f"Actualizar toda mención de '{std_name}' a '{info['vigente']}' en el expediente.",
+                ))
 
         return findings
 
@@ -212,9 +144,10 @@ class ScientificTypoRules:
         text_lower = text.lower()
 
         for pattern_str, info in ABSURD_TRANSLATIONS.items():
-            if pattern_str in text_lower:
-                # Obtener fragmento contextual
-                idx = text_lower.find(pattern_str)
+            # Usar límites de palabra para evitar falsos positivos (ej: 'ifi' dentro de 'certificado')
+            match = re.search(rf'(?<!\w){re.escape(pattern_str)}(?!\w)', text_lower)
+            if match:
+                idx = match.start()
                 snippet = text[max(0, idx - 25):min(len(text), idx + len(pattern_str) + 25)].strip()
                 snippet = snippet.replace("\n", " ")
 

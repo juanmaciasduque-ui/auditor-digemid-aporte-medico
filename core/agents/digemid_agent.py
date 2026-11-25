@@ -51,28 +51,39 @@ class DigemidAgent:
                 articulos_clave={
                     "Art. 126": (
                         "Carta de Autorización del Fabricante: Debe ser emitida por el titular o fabricante del producto, "
-                        "dirigida a la DIGEMID y al importador en Perú (indicando RUC y razón social exacta). Debe detallar "
-                        "los modelos, marcas, códigos de catálogo y sustentar expresamente los componentes de los Sets o Kits."
+                        "dirigida a la DIGEMID y al importador en Perú (indicando RUC y razón social exacta: APORTE MÉDICO PERÚ S.A.C., RUC 20610321268). "
+                        "Debe detallar los modelos, marcas, códigos de catálogo y sustentar expresamente los componentes de los Sets o Kits."
                     ),
-                    "Art. 130": (
-                        "Requisitos para la inscripción de Dispositivos Médicos Clase III: "
-                        "1. Certificado de Libre Venta (CLV) emitido por autoridad competente del país de origen o exportador. "
-                        "2. Certificado de Buenas Prácticas de Manufactura (BPM) o ISO 13485:2016 vigente. "
-                        "3. Informe Técnico detallado con especificaciones de materias primas y producto terminado. "
-                        "4. Estudios de estabilidad y sustento de vida útil (tiempo real o acelerado bajo ASTM F1980 / ISO 11607). "
+                    "Art. 128 (Clase I)": (
+                        "Requisitos para dispositivos médicos Clase I (ej. Uroclamp®, Uicop®, Conductores metálicos no invasivos/reutilizables): "
+                        "Solicitud TUPA/DISMED, CLV vigente, Certificado BPM o ISO 13485:2016, especificaciones técnicas, "
+                        "manual de uso/limpieza (ISO 17664 si es reutilizable), estudios de biocompatibilidad cutánea/mucosa (ISO 10993-5/-10) "
+                        "y proyectos de rotulado en español con RUC del titular en Perú."
+                    ),
+                    "Art. 129 (Clase IIa y IIb)": (
+                        "Requisitos para dispositivos Clase II (ej. Camisas ureterales, Canastillas de Nitinol, Pesas vaginales, Rehabilitadores activos KM 526): "
+                        "Adiciona flujograma con descripción de etapas, validación de esterilización (si es estéril), estabilidad (ASTM F1980), "
+                        "y para equipos activos/electromédicos, certificados de seguridad eléctrica IEC 60601-1 y compatibilidad electromagnética IEC 60601-1-2."
+                    ),
+                    "Art. 130 (Clase III y IV)": (
+                        "Requisitos para dispositivos médicos Clase III y IV (ej. Catéteres Doble J, Cintas Vaginales TOT/TVT, Mallas pélvicas, Asas electroquirúrgicas): "
+                        "1. Certificado de Libre Venta (CLV) emitido por autoridad competente. "
+                        "2. Certificado BPM o ISO 13485:2016 vigente. "
+                        "3. Informe Técnico detallado con fórmula cuali-cuantitativa de materias primas y producto terminado. "
+                        "4. Estudios de estabilidad y sustento de vida útil (ASTM F1980 / ISO 11607-1). "
                         "5. Flujograma de fabricación con una BREVE DESCRIPCIÓN RESUMIDA DE CADA ETAPA del proceso. "
-                        "6. Validación de esterilización (óxido de etileno según ISO 11135 con SAL 10^-6 y residuales ISO 10993-7). "
+                        "6. Validación de esterilización (EO según ISO 11135 con SAL 10^-6 y residuales ISO 10993-7, o Gamma ISO 11137). "
                         "7. Reporte de Evaluación Clínica (CER) firmado por profesional médico calificado. "
-                        "8. Batería de biocompatibilidad completa según ISO 10993-1 según la naturaleza y duración del contacto."
+                        "8. Batería de biocompatibilidad completa según ISO 10993-1 (citotoxicidad, sensibilización, implantación/genotoxicidad según contacto)."
                     ),
                     "Art. 137": (
                         "Rotulado mediato, inmediato y Manual de Instrucciones de Uso (IFU): "
-                        "Todo el texto de indicaciones, precauciones y advertencias debe estar obligatoriamente en idioma español. "
+                        "Todo el texto de indicaciones, precauciones, contraindicaciones y modo de uso debe estar obligatoriamente en idioma español. "
                         "Debe contener razón social, RUC y dirección de la droguería titular en Perú, número de lote, fecha de vencimiento "
-                        "y símbolo unívoco de estéril y un solo uso."
+                        "(si aplica) y símbolos normalizados ISO 15223-1:2021 (estéril/no estéril, un solo uso o reutilizable)."
                     ),
                 },
-                temas=["registro sanitario", "clase iii", "catéter", "flujograma", "esterilizacion", "rotulado", "vida util"],
+                temas=["registro sanitario", "clase i", "clase ii", "clase iii", "catéter", "uroclamp", "cinta", "canastilla", "asa", "flujograma", "esterilizacion", "rotulado", "vida util", "iec 60601", "iso 17664"],
                 vigencia="VIGENTE (Modificado por D.S. 029-2023-SA)",
                 enlace_oficial="https://www.digemid.minsa.gob.pe"
             ),
@@ -113,13 +124,13 @@ class DigemidAgent:
         }
 
     def _load_precedents(self):
-        """Precedentes de dispositivos médicos similares registrados exitosamente ante DIGEMID."""
+        """Precedentes y perfiles regulatorios del catálogo completo Aporte Médico / urotienda.com ante DIGEMID."""
         self.precedentes_db: List[ApprovedPrecedent] = [
             ApprovedPrecedent(
                 registro_sanitario="DM17365E (Histórico Aporte Perú)",
                 titular="APORTE MÉDICO PERÚ S.A.C.",
                 fabricante="ACE Medical Devices Pvt. Ltd. (India)",
-                producto="Catéter Ureteral Doble J y Set",
+                producto="Catéter Ureteral Doble J y Set (Clase III)",
                 calibres_fr="3.0 a 8.0 Fr",
                 longitudes_cm="6.0 a 32.0 cm",
                 vida_util="36 meses (3 años)",
@@ -127,15 +138,59 @@ class DigemidAgent:
                 material="Poliuretano Radiopaco de grado médico"
             ),
             ApprovedPrecedent(
-                registro_sanitario="DM-20451-E (Referencia Mercado Perú)",
-                titular="Droguería Médica Líder S.A.",
-                fabricante="Fabricante Certificado CE / FDA",
-                producto="Stent Ureteral Doble Cola de Cochino y Set de Colocación",
-                calibres_fr="4.0 a 8.5 Fr",
-                longitudes_cm="12.0 a 30.0 cm",
-                vida_util="60 meses (5 años con estabilidad acelerada + tiempo real)",
-                tiempo_permanencia="Hasta 90 días",
-                material="Poliuretano hidrofílico"
+                registro_sanitario="Perfil Regulatorio Clase III (Art. 130°)",
+                titular="APORTE MÉDICO PERÚ S.A.C.",
+                fabricante="Orion / Fabricante Certificado ISO 13485",
+                producto="Cinta Vaginal Libre de Tensión TOT / TVT y Mallas Pélvicas",
+                calibres_fr="N/A (Agujas/Trócares helicoidales)",
+                longitudes_cm="1.1 x 50 cm / 1.0 x 36 cm (ancho x largo)",
+                vida_util="36 a 60 meses (Estéril EO)",
+                tiempo_permanencia="Implante Permanente (> 30 días)",
+                material="Polipropileno monofilamento macroporoso"
+            ),
+            ApprovedPrecedent(
+                registro_sanitario="Perfil Regulatorio Clase IIb/III (Art. 129°/130°)",
+                titular="APORTE MÉDICO PERÚ S.A.C.",
+                fabricante="Fabricante Certificado ISO 13485",
+                producto="Canastillas Extractoras de Nitinol (3 y 4 hilos) y Camisas Ureterales",
+                calibres_fr="1.7 a 4.5 Fr (Canastillas) / 9.5–14 Fr (Camisas)",
+                longitudes_cm="70 a 120 cm (Canastillas) / 28 a 55 cm (Camisas)",
+                vida_util="36 a 60 meses (Estéril EO)",
+                tiempo_permanencia="Uso Transitorio (< 60 min)",
+                material="Nitinol (Níquel-Titanio) y vaina PTFE"
+            ),
+            ApprovedPrecedent(
+                registro_sanitario="Perfil Regulatorio Activo Clase IIb/III (IEC 60601-2-2)",
+                titular="APORTE MÉDICO PERÚ S.A.C.",
+                fabricante="Fabricante Certificado ISO 13485",
+                producto="Asas de Corte Monopolares y Bipolares (Compatibles Storz / Wolf / Olympus)",
+                calibres_fr="24 Fr / 26 Fr / 27 Fr",
+                longitudes_cm="Estándar Resectoscopio",
+                vida_util="36 meses (Desechable Estéril) o Ciclos Validados (Reutilizable)",
+                tiempo_permanencia="Uso Transitorio (< 60 min)",
+                material="Tungsteno, Acero Inoxidable y Aislamiento PTFE/Cerámico"
+            ),
+            ApprovedPrecedent(
+                registro_sanitario="Perfil Regulatorio Clase I (Art. 128° / ISO 17664)",
+                titular="APORTE MÉDICO PERÚ S.A.C.",
+                fabricante="APORTE MÉDICO S.A.S. (Colombia) / Exportación",
+                producto="Uroclamp® (Pinza Urológica Externa Masculina) & Uicop®",
+                calibres_fr="Tallas S / M / L (Uroclamp) / Estándar (Uicop)",
+                longitudes_cm="Externo anatómico",
+                vida_util="No Estéril (Reutilizable Uroclamp / Desechable Uicop)",
+                tiempo_permanencia="Contacto cutáneo intacto (reposicionar c/ 2-4 h)",
+                material="Silicona/Polímero biocompatible libre de látex (ISO 10993-5/-10)"
+            ),
+            ApprovedPrecedent(
+                registro_sanitario="Perfil Regulatorio Equipo Activo Clase IIa/IIb (Art. 129°)",
+                titular="APORTE MÉDICO PERÚ S.A.C.",
+                fabricante="Fabricante Certificado ISO 13485 + IEC 60601",
+                producto="Rehabilitador Piso Pélvico KM 526 & Pesas Íntimas / Pesarios",
+                calibres_fr="Sonda Vaginal/Anal / Pesas 20g–70g",
+                longitudes_cm="Según modelo / talla",
+                vida_util="Equipo Biomédico Activo + Accesorios Reutilizables",
+                tiempo_permanencia="Sesiones terapéuticas temporales",
+                material="ABS médico + Silicona USP Class VI (IEC 60601-1 / 60601-1-2)"
             ),
         ]
 
@@ -227,6 +282,33 @@ class DigemidAgent:
                     "únicamente el rango de 6 a 32 cm."
                 ),
                 "instrucciones": "Presentar este párrafo en el escrito de subsanación ante VUCE y eliminar tablas de 70-90 cm del paquete."
+            },
+            "REPROCESAMIENTO_ISO17664": {
+                "titulo": "Protocolo de Limpieza / Reprocesamiento para Reutilizables (Uroclamp®, Conductores, Pesas)",
+                "texto_espanol": (
+                    "INSTRUCCIONES VALIDADAS DE LIMPIEZA Y REPROCESAMIENTO (ISO 17664-1:2021):\n"
+                    "1. Dispositivos no estériles de uso domiciliario (Uroclamp®, Pesas Íntimas): Lavar antes del primer uso y después de cada aplicación con agua tibia y jabón neutro (pH 6.5-7.5). Enjuagar abundantemente y secar con paño limpio libre de pelusas. No hervir ni usar solventes agresivos.\n"
+                    "2. Instrumental quirúrgico metálico reutilizable (Conductores Uretrales de Acero Inoxidable): Prelavado enzimático inmediato, cepillado en solución detergente neutra, enjuague con agua purificada, secado completo y esterilización terminal en autoclave a vapor saturado a 134 °C durante 18 minutos (ISO 17665-1)."
+                ),
+                "instrucciones": "Incorporar en el IFU en español (Art. 137° D.S. 016-2011-SA) para dispositivos reutilizables."
+            },
+            "ACTIVOS_IEC60601": {
+                "titulo": "Cláusula de Seguridad Eléctrica y Contraindicaciones (KM 526 / Asas Electroquirúrgicas)",
+                "texto_espanol": (
+                    "SEGURIDAD ELÉCTRICA Y CONTRAINDICACIONES OBLIGATORIAS:\n"
+                    "El dispositivo cumple con los requisitos esenciales de seguridad eléctrica y compatibilidad electromagnética establecidos en IEC 60601-1 Ed. 3.1 e IEC 60601-1-2 Ed. 4.0 (y IEC 60601-2-2 para electrocirugía).\n"
+                    "CONTRAINDICACIONES ABSOLUTAS: Prohibido su uso en pacientes portadores de marcapasos cardíacos, desfibriladores implantables, durante el embarazo o en presencia de infecciones genitourinarias agudas no tratadas."
+                ),
+                "instrucciones": "Incluir en el Manual de Usuario / IFU en español y adjuntar certificado de ensayo IEC 60601 en la pestaña técnica."
+            },
+            "COLOMBIA_A_PERU_ADAPTACION": {
+                "titulo": "Adecuación de Documentación de Origen Colombia (Aporte Médico S.A.S.) a Perú (DIGEMID)",
+                "texto_espanol": (
+                    "Se precisa que para la comercialización en la República del Perú, el titular exclusivo del Registro Sanitario es APORTE MÉDICO PERÚ S.A.C. (RUC N° 20610321268), "
+                    "con domicilio en Lima, Perú, actuando como droguería autorizada bajo el D.S. 014-2011-SA y el D.S. 016-2011-SA. "
+                    "Los rotulados mediato e inmediato y manuales de uso cumplen con la Ley N° 29459 y el Art. 137° del D.S. 016-2011-SA."
+                ),
+                "instrucciones": "Asegurar que ningún archivo técnico (salvo el CLV emitido por INVIMA) cite Decreto 4725, NIT o Aporte Médico S.A.S. como titular en Perú."
             }
         }
 

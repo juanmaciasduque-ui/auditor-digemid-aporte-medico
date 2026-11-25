@@ -6,6 +6,7 @@ recupera metadatos, tablas y analiza la orientación física de las páginas.
 
 import os
 import re
+import tempfile
 from pathlib import Path
 from typing import Dict, List, Tuple, Any, Optional
 
@@ -16,8 +17,19 @@ from core.models import DocumentMetadata
 
 # Inicialización diferida de OCR para optimizar arranque
 _OCR_ENGINE = None
-CACHE_DIR = Path(__file__).resolve().parent.parent / ".ocr_cache"
-CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+def _get_cache_dir() -> Path:
+    """Usa el directorio temporal del sistema (seguro en nube/solo-lectura) para caché OCR."""
+    base = Path(tempfile.gettempdir()) / "digemid_ocr_cache"
+    try:
+        base.mkdir(parents=True, exist_ok=True)
+        return base
+    except Exception:
+        fallback = Path(__file__).resolve().parent.parent / ".ocr_cache"
+        fallback.mkdir(parents=True, exist_ok=True)
+        return fallback
+
+CACHE_DIR = _get_cache_dir()
 
 def get_ocr_engine():
     global _OCR_ENGINE
@@ -40,8 +52,8 @@ class DocumentIngestionEngine:
     def __init__(
         self,
         enable_ocr: bool = True,
-        ocr_min_chars: int = 40,
-        max_ocr_pages: int = 15,
+        ocr_min_chars: int = 80,
+        max_ocr_pages: int = 25,
         full_ocr: bool = False
     ):
         self.enable_ocr = enable_ocr
@@ -50,9 +62,11 @@ class DocumentIngestionEngine:
         self.full_ocr = full_ocr
 
     def _get_cache_path(self, file_path: Path, page_num: int) -> Path:
-        mtime = int(file_path.stat().st_mtime) if file_path.exists() else 0
-        safe_name = re.sub(r'[^\w\-_\.]', '_', file_path.stem)
-        return CACHE_DIR / f"{safe_name}_p{page_num}_{mtime}.txt"
+        stat = file_path.stat() if file_path.exists() else None
+        mtime = int(stat.st_mtime) if stat else 0
+        size = stat.st_size if stat else 0
+        safe_name = re.sub(r'[^\w\-_\.]', '_', file_path.stem)[:60]
+        return CACHE_DIR / f"{safe_name}_p{page_num}_{size}_{mtime}.txt"
 
     def process_file(self, filepath: str) -> Tuple[DocumentMetadata, Dict[int, str], List[Dict[str, Any]]]:
         """
@@ -60,83 +74,101 @@ class DocumentIngestionEngine:
         (metadata, texto_por_pagina, tablas_extraidas)
         """
         path = Path(filepath)
+        if not path.exists():
+            raise FileNotFoundError(f"El archivo '{path.name}' no existe o fue eliminado.")
+
         suffix = path.suffix.lower()
 
         if suffix == ".pdf":
             return self._process_pdf(path)
-        elif suffix in [".docx", ".doc"]:
+        elif suffix == ".docx":
             return self._process_docx(path)
-        elif suffix in [".png", ".jpg", ".jpeg", ".tiff", ".bmp"]:
+        elif suffix == ".doc":
+            raise ValueError(
+                f"El archivo '{path.name}' usa el formato binario antiguo .doc (Word 97-2003). "
+                "La plataforma VUCE / DIGEMID exige formato PDF o DOCX moderno. Convierta el archivo a PDF o .docx."
+            )
+        elif suffix in [".png", ".jpg", ".jpeg", ".tiff", ".tif", ".bmp"]:
             return self._process_image(path)
         else:
-            raise ValueError(f"Formato no soportado: {suffix}. Use PDF, DOCX o imágenes.")
+            raise ValueError(f"Formato no soportado: {suffix}. Use PDF, DOCX o imágenes (PNG/JPG).")
 
     def _process_pdf(self, path: Path) -> Tuple[DocumentMetadata, Dict[int, str], List[Dict[str, Any]]]:
-        doc = fitz.open(str(path))
-        total_pages = len(doc)
         pages_text: Dict[int, str] = {}
         tables_data: List[Dict[str, Any]] = []
         is_scanned_overall = False
         has_signatures = False
         has_seals = False
-
-        # Extraer metadatos nativos
-        meta = doc.metadata or {}
-        author = meta.get("author", "") or ""
-        creator = meta.get("creator", "") or ""
-        producer = meta.get("producer", "") or ""
-        creation_date = meta.get("creationDate", "") or ""
-        mod_date = meta.get("modDate", "") or ""
-
         file_size = path.stat().st_size if path.exists() else 0
 
-        for page_idx in range(total_pages):
-            page_num = page_idx + 1
-            page = doc[page_idx]
+        if file_size == 0:
+            raise ValueError(f"El archivo '{path.name}' está vacío (0 bytes) o corrupto.")
 
-            # 1. Extracción de texto nativo
-            text = page.get_text("text").strip()
-            image_list = page.get_images()
-
-            # 2. Detección de página escaneada / sin texto
-            if len(text) < self.ocr_min_chars and len(image_list) > 0 and self.enable_ocr:
-                is_scanned_overall = True
-                # Optimización: en documentos escaneados extensos (>15 pp), priorizar inicio y bloque de firmas
-                should_ocr = (
-                    self.full_ocr
-                    or total_pages <= self.max_ocr_pages
-                    or page_idx < 10
-                    or page_idx >= (total_pages - 5)
+        with fitz.open(str(path)) as doc:
+            if doc.needs_pass:
+                raise ValueError(
+                    f"El PDF '{path.name}' está protegido con contraseña o cifrado. "
+                    "DIGEMID / VUCE rechaza archivos bloqueados; guarde una copia desbloqueada sin contraseña."
                 )
-                if should_ocr:
-                    ocr_text = self._ocr_page(page, source_path=path)
-                    if ocr_text:
-                        text = f"{text}\n{ocr_text}".strip()
 
-            pages_text[page_num] = text
+            total_pages = len(doc)
+            if total_pages == 0:
+                raise ValueError(f"El archivo '{path.name}' no contiene páginas válidas.")
 
-            # 3. Detección preliminar de firmas / sellos en imágenes
-            if len(image_list) > 0:
-                for img_info in image_list:
-                    # Heurística: imágenes con tamaño característico de firma o sello
-                    width, height = img_info[2], img_info[3]
-                    if 50 <= width <= 600 and 30 <= height <= 400:
-                        has_signatures = True
+            # Extraer metadatos nativos
+            meta = doc.metadata or {}
+            author = meta.get("author", "") or ""
+            creator = meta.get("creator", "") or ""
+            producer = meta.get("producer", "") or ""
+            creation_date = meta.get("creationDate", "") or ""
+            mod_date = meta.get("modDate", "") or ""
 
-            # 4. Extracción de tablas estructuradas si están disponibles
-            try:
-                tables = page.find_tables()
-                if tables and len(tables.tables) > 0:
-                    for t in tables.tables:
-                        df_rows = t.extract()
-                        if df_rows:
-                            tables_data.append({
-                                "page": page_num,
-                                "rows": df_rows,
-                                "header": df_rows[0] if len(df_rows) > 0 else [],
-                            })
-            except Exception:
-                pass
+            for page_idx in range(total_pages):
+                page_num = page_idx + 1
+                page = doc[page_idx]
+
+                # 1. Extracción de texto nativo
+                text = page.get_text("text").strip()
+                image_list = page.get_images()
+
+                # 2. Detección de página escaneada / sin texto suficiente
+                if len(text) < self.ocr_min_chars and len(image_list) > 0 and self.enable_ocr:
+                    is_scanned_overall = True
+                    # Optimización: en documentos escaneados extensos (>25 pp), priorizar inicio, secciones clave y firmas
+                    should_ocr = (
+                        self.full_ocr
+                        or total_pages <= self.max_ocr_pages
+                        or page_idx < 15
+                        or page_idx >= (total_pages - 10)
+                    )
+                    if should_ocr:
+                        ocr_text = self._ocr_page(page, source_path=path)
+                        if ocr_text:
+                            text = f"{text}\n{ocr_text}".strip()
+
+                pages_text[page_num] = text
+
+                # 3. Detección preliminar de firmas / sellos en imágenes
+                if len(image_list) > 0:
+                    for img_info in image_list:
+                        width, height = img_info[2], img_info[3]
+                        if 50 <= width <= 600 and 30 <= height <= 400:
+                            has_signatures = True
+
+                # 4. Extracción de tablas estructuradas si están disponibles
+                try:
+                    tables = page.find_tables()
+                    if tables and len(tables.tables) > 0:
+                        for t in tables.tables:
+                            df_rows = t.extract()
+                            if df_rows:
+                                tables_data.append({
+                                    "page": page_num,
+                                    "rows": df_rows,
+                                    "header": df_rows[0] if len(df_rows) > 0 else [],
+                                })
+                except Exception:
+                    pass
 
         doc_meta = DocumentMetadata(
             filename=path.name,

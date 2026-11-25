@@ -200,11 +200,12 @@ class BatchAuditResult:
 
     @property
     def has_non_regulatory_docs(self) -> bool:
-        """Determina si el lote contiene documentos ajenos o no pertinentes."""
+        """Determina si el lote contiene documentos ajenos, ilegibles o no pertinentes."""
         return any(
-            "Documento No Pertinente" in f.title or 
-            "Sin Pertinencia Regulatoria" in f.title or 
-            "Lote Documental Inválido" in f.title
+            "Documento No Pertinente" in f.title
+            or "Sin Pertinencia Regulatoria" in f.title
+            or "Lote Documental Inválido" in f.title
+            or "Ilegible o en Blanco" in f.title
             for f in self.all_findings
         )
 

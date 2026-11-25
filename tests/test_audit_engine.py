@@ -345,5 +345,113 @@ def test_batch_all_irrelevant_documents_verdict():
     assert "NO APTO: EXPEDIENTE INVÁLIDO" in batch_result.verdict
 
 
+# ==============================================================================
+# PRUEBAS DE CATÁLOGO COMPLETO APORTE MÉDICO / UROTIENDA Y CORRECCIÓN DE BUGS
+# ==============================================================================
+
+def test_ifi_word_boundary_no_false_positive_in_certificado():
+    rules = ScientificTypoRules()
+    text = "Certificado de Libre Venta. Especificaciones técnicas e identificación de calidad verificada."
+    findings = rules.analyze_document("clv.pdf", {1: text})
+    assert not any("ifi" in f.detected_text.lower() for f in findings)
+
+
+def test_mesh_mm_to_cm_normalization_no_false_positive():
+    engine = CrossDocumentConsistencyEngine()
+    p1 = engine.extract_document_parameters("Ficha.pdf", {1: "Cinta vaginal de polipropileno 1.1 x 50 cm."})
+    rep1 = DocumentReport(metadata=DocumentMetadata("Ficha.pdf", "", "PDF", 1), parameters=p1)
+    p2 = engine.extract_document_parameters("Manual.pdf", {1: "Cinta vaginal de polipropileno 11 x 500 mm."})
+    rep2 = DocumentReport(metadata=DocumentMetadata("Manual.pdf", "", "PDF", 1), parameters=p2)
+
+    cross_findings = engine.check_batch_consistency({"Ficha.pdf": rep1, "Manual.pdf": rep2}, product_family="VAGINAL_SLINGS_MESHES")
+    assert not any("Descalce en Dimensiones de Malla" in f.title for f in cross_findings)
+
+
+def test_nitinol_basket_length_70_120_not_flagged_as_double_j_infiltration():
+    engine = CrossDocumentConsistencyEngine()
+    p1 = engine.extract_document_parameters("Ficha_Canastilla.pdf", {1: "Canastilla extractora de Nitinol 3 hilos, calibre 2.2 Fr, longitud 70-120 cm."})
+    rep1 = DocumentReport(metadata=DocumentMetadata("Ficha_Canastilla.pdf", "", "PDF", 1), parameters=p1)
+    p2 = engine.extract_document_parameters("IFU_Canastilla.pdf", {1: "Canastilla de Nitinol 2.2 Fr, longitud 70-120 cm para ureteroscopia."})
+    rep2 = DocumentReport(metadata=DocumentMetadata("IFU_Canastilla.pdf", "", "PDF", 1), parameters=p2)
+
+    cross_findings = engine.check_batch_consistency(
+        {"Ficha_Canastilla.pdf": rep1, "IFU_Canastilla.pdf": rep2},
+        product_family="NITINOL_BASKETS_ACCESS"
+    )
+    assert not any("Ureteral Catheter" in f.title for f in cross_findings)
+
+
+def test_uroclamp_reusable_without_cleaning_and_reusable_clash():
+    rules = DigemidLegalRules()
+    ifu_text = (
+        "MANUAL DE USUARIO UROCLAMP. Pinza anatómica externa reutilizable para control de incontinencia masculina. "
+        "Fabricado en silicona médica libre de látex. Uso externo diario por el paciente. Mantener en lugar fresco y seco."
+    )
+    findings = rules.analyze_document("IFU_Uroclamp.pdf", {1: ifu_text}, product_family="NON_INVASIVE_INCONTINENCE")
+    assert any("ISO 17664" in f.title for f in findings)
+
+    engine = CrossDocumentConsistencyEngine()
+    p1 = engine.extract_document_parameters("IFU_Uroclamp.pdf", {1: "Uroclamp dispositivo reutilizable para incontinencia."})
+    rep1 = DocumentReport(metadata=DocumentMetadata("IFU_Uroclamp.pdf", "", "PDF", 1), parameters=p1)
+    p2 = engine.extract_document_parameters("Rotulo_Uroclamp.pdf", {1: "Uroclamp pinza externa. Un solo uso / Do not reuse."})
+    rep2 = DocumentReport(metadata=DocumentMetadata("Rotulo_Uroclamp.pdf", "", "PDF", 1), parameters=p2)
+    cross_findings = engine.check_batch_consistency({"IFU_Uroclamp.pdf": rep1, "Rotulo_Uroclamp.pdf": rep2})
+    assert any("Un Solo Uso" in f.title and "Reutilizable" in f.title for f in cross_findings)
+
+
+def test_active_device_km526_missing_contraindications_and_iec60601():
+    rules = DigemidLegalRules()
+    manual_text = (
+        "MANUAL DE USUARIO REHABILITADOR DE PISO PÉLVICO KM 526. "
+        "Equipo de electroestimulación neuromuscular y biofeedback para fortalecimiento del suelo pélvico. "
+        "Incluye sonda vaginal de silicona médica, programas de frecuencia de 10 a 100 Hz y pantalla LCD."
+    )
+    findings = rules.analyze_document("Manual_KM526.pdf", {1: manual_text}, product_family="PELVIC_REHAB_ACTIVE")
+    assert any("Contraindicaciones Clínicas Obligatorias" in f.title for f in findings)
+
+    tech_text = (
+        "INFORME TÉCNICO REHABILITADOR KM 526. Equipo terapéutico de electroestimulación pélvica. "
+        "Carcasa de ABS grado médico, corriente de salida 0 a 80 mA, ancho de pulso 250 us."
+    )
+    tech_findings = rules.analyze_document("Informe_Tecnico_KM526.pdf", {1: tech_text}, product_family="PELVIC_REHAB_ACTIVE")
+    assert any("IEC 60601" in f.title for f in tech_findings)
+
+
+def test_empty_doc_and_corrupt_file_handled_as_fatal(tmp_path):
+    rules = DigemidLegalRules()
+    empty_findings = rules.analyze_document("Blanco.pdf", {1: "   "})
+    assert any("Ilegible o en Blanco" in f.title and f.severity == Severity.FATAL for f in empty_findings)
+
+    bad_pdf = tmp_path / "corrupto.pdf"
+    bad_pdf.write_bytes(b"not a real pdf content")
+    auditor = DigemidDocumentAuditor(enable_ocr=False)
+    res = auditor.audit_batch([str(bad_pdf)])
+    assert "corrupto.pdf" in res.documents
+    assert res.total_fatal >= 1
+    assert any("Error Crítico de Lectura" in f.title for f in res.all_findings)
+
+
+def test_invima_in_peru_technical_doc_flagged_but_clv_allowed():
+    rules = DigemidLegalRules()
+    tech = "Informe Técnico del dispositivo médico Uroclamp conforme al Decreto 4725 de 2005 y Registro Sanitario INVIMA."
+    f_tech = rules.analyze_document("Informe_Tecnico.pdf", {1: tech})
+    assert any("INVIMA" in f.title for f in f_tech)
+
+    clv = "Certificado de Libre Venta emitido por INVIMA Colombia. Exportador Aporte Medico S.A.S. hacia APORTE MÉDICO PERÚ S.A.C. RUC 20610321268."
+    f_clv = rules.analyze_document("CLV_Colombia.pdf", {1: clv})
+    assert not any("INVIMA" in f.title for f in f_clv)
+
+
+def test_spanish_labeling_art137_required():
+    rules = DigemidLegalRules()
+    eng_ifu = (
+        "Instructions for use of the sterile medical device. Warning: Do not reuse. "
+        "Caution: Federal law restricts this device to sale by a physician. "
+        "Manufactured for single use only. Keep away from sunlight and moisture."
+    )
+    findings = rules.analyze_document("IFU_Product.pdf", {1: eng_ifu})
+    assert any("Art. 137°" in f.title for f in findings)
+
+
 if __name__ == "__main__":
     pytest.main(["-v", __file__])

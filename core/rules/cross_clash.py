@@ -10,7 +10,7 @@ Cubre el Catálogo C:
 """
 
 import re
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Set
 from core.models import Finding, Severity, Category, ExtractedParameters, DocumentReport
 from config import MASTER_SPECIFICATIONS
 
@@ -19,20 +19,41 @@ class CrossDocumentConsistencyEngine:
     """Motor de análisis de concordancia cruzada y contaminación documental."""
 
     def extract_document_parameters(self, doc_name: str, pages_text: Dict[int, str]) -> ExtractedParameters:
-        """Extrae parámetros universales numéricos y clínicos de cualquier tipo de dispositivo médico."""
+        """Extrae parámetros universales numéricos y clínicos de cualquier dispositivo del catálogo Aporte Médico."""
         params = ExtractedParameters()
         full_text = " ".join(pages_text.values())
 
-        # 0. Identificación automática del producto
-        if re.search(r'\b(?:cinta\s+vaginal|sling|malla|mesh|incontinencia)\b', full_text, re.IGNORECASE):
-            params.detected_product_name = "Cinta Vaginal / Malla Quirúrgica"
-            params.detected_risk_class = "Clase III (Implante Quirúrgico)"
+        # 0. Identificación automática del producto (Catálogo completo Aporte Médico / urotienda.com)
+        if re.search(r'\b(?:uroclamp|pinza\s+(?:de\s+)?cunningham|incontinencia\s+masculina)\b', full_text, re.IGNORECASE):
+            params.detected_product_name = "Uroclamp® (Pinza Urológica Externa)"
+            params.detected_risk_class = "Clase I (No Invasivo Reutilizable)"
+        elif re.search(r'\b(?:uicop|urinario\s+femenino\s+desechable)\b', full_text, re.IGNORECASE):
+            params.detected_product_name = "Uicop® (Accesorio Urinario Femenino)"
+            params.detected_risk_class = "Clase I (No Invasivo Desechable)"
+        elif re.search(r'\b(?:km\s*526|electroestimulador|biofeedback|rehabilitador\s+(?:de\s+)?piso\s+p[eé]lvico)\b', full_text, re.IGNORECASE):
+            params.detected_product_name = "Rehabilitador de Piso Pélvico (Activo)"
+            params.detected_risk_class = "Clase IIa / IIb (Equipo Activo Terapéutico)"
+        elif re.search(r'\b(?:pesas?\s+(?:[íi]ntimas?|vaginales?)|conos?\s+vaginales?|pesarios?)\b', full_text, re.IGNORECASE):
+            params.detected_product_name = "Pesas Vaginales / Pesario Ginecológico"
+            params.detected_risk_class = "Clase I / IIa (Invasivo Temporal)"
+        elif re.search(r'\b(?:canastilla|stone\s+(?:retrieval|extractor)\s+basket|nitinol\s+basket)\b', full_text, re.IGNORECASE):
+            params.detected_product_name = "Canastilla Extractora de Nitinol"
+            params.detected_risk_class = "Clase IIb / III (Invasivo Quirúrgico)"
+        elif re.search(r'\b(?:camisa\s+(?:de\s+acceso\s+)?ureteral|ureteral\s+access\s+sheath)\b', full_text, re.IGNORECASE):
+            params.detected_product_name = "Camisa de Acceso Ureteral"
+            params.detected_risk_class = "Clase IIa / IIb"
+        elif re.search(r'\b(?:conductor\s+uretral|gu[ií]a\s+uretral\s+met[aá]lic[oa])\b', full_text, re.IGNORECASE):
+            params.detected_product_name = "Conductor Uretral Metálico"
+            params.detected_risk_class = "Clase I / IIa (Reutilizable)"
+        elif re.search(r'\b(?:asa\s+de\s+(?:corte|resecci[oó]n)|resection\s+loop|electrodo\s+(?:monopolar|bipolar))\b', full_text, re.IGNORECASE):
+            params.detected_product_name = "Asa de Corte Endoscópica (Monopolar/Bipolar)"
+            params.detected_risk_class = "Clase IIb / III (Activo Quirúrgico)"
+        elif re.search(r'\b(?:cinta\s+vaginal|sling|malla|mesh|tot\b|tvt\b)\b', full_text, re.IGNORECASE):
+            params.detected_product_name = "Cinta Vaginal (TOT/TVT) / Malla Quirúrgica"
+            params.detected_risk_class = "Clase III (Implante Quirúrgico Permanente)"
         elif re.search(r'\b(?:cat[eé]ter\s+ureteral|stent\s+ureteral|doble\s*j|pigtail)\b', full_text, re.IGNORECASE):
             params.detected_product_name = "Catéter / Stent Ureteral Doble J"
             params.detected_risk_class = "Clase III (Invasivo Quirúrgico)"
-        elif re.search(r'\b(?:asa\s+de\s+resecci[oó]n|resection\s+loop|electrodo)\b', full_text, re.IGNORECASE):
-            params.detected_product_name = "Asa de Resección Endoscópica"
-            params.detected_risk_class = "Clase IIb / III"
         elif re.search(r'\b(?:sutura|suture|poliglactina|polidioxanona)\b', full_text, re.IGNORECASE):
             params.detected_product_name = "Sutura Quirúrgica"
             params.detected_risk_class = "Clase IIb / III"
@@ -41,9 +62,9 @@ class CrossDocumentConsistencyEngine:
             params.detected_risk_class = "Clase IIa"
         else:
             params.detected_product_name = "Dispositivo Médico General"
-            params.detected_risk_class = "Clase I / II / III / IV"
+            params.detected_risk_class = "Clase I / IIa / IIb / III"
 
-        # 1. Extracción de diámetros Fr
+        # 1. Extracción de diámetros Fr (rangos y valores individuales)
         fr_matches = re.findall(r'\b(\d+(?:\.\d+)?)\s*(?:[-–to]|a)\s*(\d+(?:\.\d+)?)\s*(?:Fr|FG|CH)\b', full_text, re.IGNORECASE)
         all_frs = []
         for low_s, high_s in fr_matches:
@@ -51,29 +72,40 @@ class CrossDocumentConsistencyEngine:
                 all_frs.extend([float(low_s), float(high_s)])
             except ValueError:
                 pass
+        if not all_frs:
+            single_frs = re.findall(r'\b(\d+(?:\.\d+)?)\s*(?:Fr|FG|CH)\b', full_text, re.IGNORECASE)
+            for s_fr in single_frs:
+                try:
+                    all_frs.append(float(s_fr))
+                except ValueError:
+                    pass
         if all_frs:
             params.diameters_fr = [min(all_frs), max(all_frs)]
-            params.diameters_fr_raw = f"{min(all_frs)}–{max(all_frs)} Fr"
+            if min(all_frs) == max(all_frs):
+                params.diameters_fr_raw = f"{min(all_frs):g} Fr"
+            else:
+                params.diameters_fr_raw = f"{min(all_frs):g}–{max(all_frs):g} Fr"
 
         # 2. Extracción de calibres Gauge (G)
         g_matches = re.findall(r'\b(\d+)\s*(?:G|Gauge)\b', full_text, re.IGNORECASE)
         if g_matches:
             params.gauges = [int(g) for g in g_matches]
-            params.gauges_raw = ", ".join(set(g_matches)) + " G"
+            params.gauges_raw = ", ".join(sorted(set(g_matches))) + " G"
 
-        # 3. Extracción de dimensiones de mallas/cintas (ej: 1.1 x 50 cm, 1 x 36 cm, 10 x 15 cm)
-        mesh_m = re.findall(r'\b(\d+(?:\.\d+)?)\s*(?:x|×|de\s+ancho\s+por)\s*(\d+(?:\.\d+)?)\s*(?:cm|mm)\b', full_text, re.IGNORECASE)
+        # 3. Extracción de dimensiones de mallas/cintas con normalización mm -> cm
+        mesh_m = re.findall(r'\b(\d+(?:\.\d+)?)\s*(?:x|×|de\s+ancho\s+por)\s*(\d+(?:\.\d+)?)\s*(cm|mm)\b', full_text, re.IGNORECASE)
         if mesh_m:
-            for w, l in mesh_m:
-                params.mesh_dimensions.append(f"{w} x {l} cm")
-        # Patrón inverso: 36 cm de largo por un/1 cm de ancho
+            for w, l, unit in mesh_m:
+                try:
+                    w_f, l_f = float(w), float(l)
+                    if unit.lower() == "mm":
+                        w_f, l_f = round(w_f / 10.0, 2), round(l_f / 10.0, 2)
+                    params.mesh_dimensions.append(f"{w_f:g} x {l_f:g} cm")
+                except ValueError:
+                    pass
         mesh_inv = re.findall(r'\b(\d+(?:\.\d+)?)\s*cm\s+de\s+largo\s+por\s+(?:un|1|\d+(?:\.\d+)?)\s*cm\s+de\s+ancho\b', full_text, re.IGNORECASE)
         for l in mesh_inv:
             params.mesh_dimensions.append(f"1 x {l} cm")
-        # Dimensiones en reportes en inglés (Length in cm: 11 cm)
-        mesh_eng = re.findall(r'Length\s*(?:in\s*cm)?\s*[:\-_]?\s*(\d+(?:\.\d+)?)\s*cms?', full_text, re.IGNORECASE)
-        for l in mesh_eng:
-            params.mesh_dimensions.append(f"Longitud {l} cm")
 
         # 4. Extracción de longitudes en cm
         cm_matches = re.findall(r'\b(\d+)\s*(?:[-–to]|a)\s*(\d+)\s*cm\b', full_text, re.IGNORECASE)
@@ -85,7 +117,7 @@ class CrossDocumentConsistencyEngine:
                 pass
         if all_cms:
             params.lengths_cm = [min(all_cms), max(all_cms)]
-            params.lengths_cm_raw = f"{min(all_cms)}–{max(all_cms)} cm"
+            params.lengths_cm_raw = f"{min(all_cms):g}–{max(all_cms):g} cm"
 
         # 5. Extracción de vida útil (shelf life)
         if re.search(r'\b(?:1\s*d[ií]a|1\s*day)\b', full_text, re.IGNORECASE):
@@ -125,38 +157,53 @@ class CrossDocumentConsistencyEngine:
             params.materials.append("Polipropileno")
         if re.search(r'\b(?:silicone|silicona)\b', full_text, re.IGNORECASE):
             params.materials.append("Silicona")
+        if re.search(r'\b(?:nitinol|n[ií]quel[-\s]*titanio)\b', full_text, re.IGNORECASE):
+            params.materials.append("Nitinol")
+        if re.search(r'\b(?:tungsten|tungsteno)\b', full_text, re.IGNORECASE):
+            params.materials.append("Tungsteno")
         if re.search(r'\b(?:stainless\s+steel|acero\s+inoxidable)\b', full_text, re.IGNORECASE):
             params.materials.append("Acero Inoxidable")
 
-        # 8. Métodos de esterilización
-        # Priorizar declaración explícita en encabezado o campo 'MÉTODO DE ESTERILIZACIÓN'
-        explicit_steril = re.search(
-            r'(?:M[EÉ]TODO\s+DE\s+ESTERILIZACI[OÓ]N|STERILIZATION\s+METHOD|ESTERILIZACION\s+A)\s*[:\-_]?\s*([^\.\n\r]+)',
-            full_text,
-            re.IGNORECASE
-        )
-        if explicit_steril:
-            val_s = explicit_steril.group(1).strip()
-            if re.search(r'per[oó]xido|plasma|sterrad', val_s, re.IGNORECASE):
-                params.sterilization_methods.append("Peróxido de Hidrógeno (Plasma)")
-            elif re.search(r'[oó]xido\s+de\s+etileno|EO|ETO', val_s, re.IGNORECASE):
-                params.sterilization_methods.append("Óxido de Etileno (EO)")
-            elif re.search(r'gamma|radiaci[oó]n', val_s, re.IGNORECASE):
-                params.sterilization_methods.append("Radiación Gamma")
-            elif re.search(r'vapor|autoclave', val_s, re.IGNORECASE):
-                params.sterilization_methods.append("Vapor / Autoclave")
+        # 8. Métodos de esterilización y condición estéril / no estéril
+        if re.search(r'\b(?:no\s+est[eé]ril|non[-\s]*sterile|producto\s+no\s+est[eé]ril)\b', full_text, re.IGNORECASE):
+            params.sterilization_methods.append("No Estéril")
+        else:
+            explicit_steril = re.search(
+                r'(?:M[EÉ]TODO\s+DE\s+ESTERILIZACI[OÓ]N|STERILIZATION\s+METHOD|ESTERILIZACION\s+A)\s*[:\-_]?\s*([^\.\n\r]+)',
+                full_text,
+                re.IGNORECASE
+            )
+            if explicit_steril:
+                val_s = explicit_steril.group(1).strip()
+                if re.search(r'per[oó]xido|plasma|sterrad', val_s, re.IGNORECASE):
+                    params.sterilization_methods.append("Peróxido de Hidrógeno (Plasma)")
+                elif re.search(r'[oó]xido\s+de\s+etileno|\bEO\b|\bETO\b', val_s, re.IGNORECASE):
+                    params.sterilization_methods.append("Óxido de Etileno (EO)")
+                elif re.search(r'gamma|radiaci[oó]n', val_s, re.IGNORECASE):
+                    params.sterilization_methods.append("Radiación Gamma")
+                elif re.search(r'vapor|autoclave|steam', val_s, re.IGNORECASE):
+                    params.sterilization_methods.append("Vapor / Autoclave")
 
-        if not params.sterilization_methods:
-            if re.search(r'\b(?:ethylene\s+oxide|[oó]xido\s+de\s+etileno|EO\s+sterilization|ETO)\b', full_text, re.IGNORECASE):
-                params.sterilization_methods.append("Óxido de Etileno (EO)")
-            if re.search(r'\b(?:gamma\s+radiation|radiaci[oó]n\s+gamma|cobalt\s*60)\b', full_text, re.IGNORECASE):
-                params.sterilization_methods.append("Radiación Gamma")
-            if re.search(r'\b(?:steam|vapor|autoclave)\b', full_text, re.IGNORECASE):
-                params.sterilization_methods.append("Vapor / Autoclave")
-            if re.search(r'\b(?:per[oó]xido\s+de\s+hidr[oó]geno|hydrogen\s+peroxide|plasma|sterrad)\b', full_text, re.IGNORECASE):
-                params.sterilization_methods.append("Peróxido de Hidrógeno (Plasma)")
+            if not params.sterilization_methods:
+                if re.search(r'\b(?:ethylene\s+oxide|[oó]xido\s+de\s+etileno|EO\s+sterilization|ETO)\b', full_text, re.IGNORECASE):
+                    params.sterilization_methods.append("Óxido de Etileno (EO)")
+                if re.search(r'\b(?:gamma\s+radiation|radiaci[oó]n\s+gamma|cobalt\s*60)\b', full_text, re.IGNORECASE):
+                    params.sterilization_methods.append("Radiación Gamma")
+                if re.search(r'\b(?:steam\s+sterilization|vapor\s+de\s+agua|autoclave)\b', full_text, re.IGNORECASE):
+                    params.sterilization_methods.append("Vapor / Autoclave")
+                if re.search(r'\b(?:per[oó]xido\s+de\s+hidr[oó]geno|hydrogen\s+peroxide|plasma|sterrad)\b', full_text, re.IGNORECASE):
+                    params.sterilization_methods.append("Peróxido de Hidrógeno (Plasma)")
 
-        # 9. Componentes del Set / Kit
+        # 9. Reusabilidad vs Un solo uso + compatibilidad + componentes del Set
+        if re.search(r'\b(?:un\s+solo\s+uso|single\s*use|desechable|disposable|do\s+not\s+reuse|no\s+reutilizar)\b', full_text, re.IGNORECASE):
+            params.device_types.append("Un solo uso")
+        elif re.search(r'\b(?:reutilizable|reusable)\b', full_text, re.IGNORECASE):
+            params.device_types.append("Reutilizable")
+
+        for brand in ["Storz", "Wolf", "Olympus"]:
+            if re.search(rf'\b{brand}\b', full_text, re.IGNORECASE):
+                params.device_types.append(f"Compatible {brand}")
+
         if re.search(r'\b(?:doesn\'?t\s+contain\s+any\s+components?|no\s+contains?\s+any\s+components?|sin\s+componentes)\b', full_text, re.IGNORECASE):
             params.components.append("NO_COMPONENTS_DECLARED")
         if re.search(r'\b(?:guidewire|gu[ií]a\s+hidrof[ií]lica|PTFE\s+guidewire)\b', full_text, re.IGNORECASE):
@@ -318,12 +365,35 @@ class CrossDocumentConsistencyEngine:
 
         return findings
 
-    def check_batch_consistency(self, doc_reports: Dict[str, DocumentReport]) -> List[Finding]:
+    def check_batch_consistency(
+        self,
+        doc_reports: Dict[str, DocumentReport],
+        product_family: str = "UNIVERSAL"
+    ) -> List[Finding]:
         """
         Ejecuta la auditoría cruzada global entre todos los documentos del lote.
-        Compara medidas Fr, longitudes cm, vida útil, permanencia clínica y componentes del Set.
+        Compara medidas Fr, longitudes cm, vida útil, permanencia clínica, esterilidad,
+        condición de reuso, materiales y compatibilidad de marca de forma adaptativa al dispositivo.
         """
         cross_findings: List[Finding] = []
+
+        # Detectar si el lote pertenece a un producto donde >60 cm es normal (Canastillas Nitinol, Suturas, Venoclisis)
+        detected_products = {r.parameters.detected_product_name for r in doc_reports.values()}
+        is_long_device_expected = (
+            product_family in ("NITINOL_BASKETS_ACCESS", "SURGICAL_SUTURES", "IV_CATHETERS_INFUSION")
+            or any(
+                any(kw in prod for kw in ("Canastilla", "Camisa", "Sutura", "Infusión"))
+                for prod in detected_products
+            )
+        )
+        is_ureteral_stent_context = (
+            product_family == "URETERAL_STENTS"
+            or (
+                product_family == "UNIVERSAL"
+                and any("Doble J" in prod for prod in detected_products)
+                and not is_long_device_expected
+            )
+        )
 
         # 1. Comparación de Diámetros Fr entre Documentos
         fr_by_doc: Dict[str, Tuple[float, float, str]] = {}
@@ -341,7 +411,6 @@ class CrossDocumentConsistencyEngine:
                 for j in range(i + 1, len(items)):
                     doc1, (min1, max1, raw1) = items[i]
                     doc2, (min2, max2, raw2) = items[j]
-                    # Si difieren significativamente (ej: 2-12 Fr vs 3-8 Fr)
                     if abs(min1 - min2) >= 0.5 or abs(max1 - max2) >= 1.0:
                         cross_findings.append(Finding(
                             id=f"CROSS_FR_CLASH_{i}_{j}",
@@ -362,11 +431,13 @@ class CrossDocumentConsistencyEngine:
                             remediation_advice="Definir con el fabricante una matriz de calibres Fr idéntica en el 100% de documentos.",
                         ))
 
-        # 2. Infiltración de Longitud de Catéter Ureteral (70–90 cm)
+        # 2. Validación de Longitudes (cm): Infiltración 70–90 cm en Doble J y Descalce Cruzado Universal
+        len_by_doc: Dict[str, Tuple[float, float, str]] = {}
         for name, rep in doc_reports.items():
             if rep.parameters.lengths_cm:
                 min_l, max_l = rep.parameters.lengths_cm[0], rep.parameters.lengths_cm[-1]
-                if max_l >= 60.0: # Longitudes de 70 a 90 cm
+                len_by_doc[name] = (min_l, max_l, rep.parameters.lengths_cm_raw)
+                if is_ureteral_stent_context and max_l >= 60.0:
                     cross_findings.append(Finding(
                         id=f"CROSS_LENGTH_INFILTRATION_{name}",
                         document_name=name,
@@ -385,6 +456,30 @@ class CrossDocumentConsistencyEngine:
                         digemid_norm_ref="D.S. 016-2011-SA Art. 130°",
                         remediation_advice="Eliminar las especificaciones de 70-90 cm del expediente de Stents Doble J.",
                     ))
+
+        if len(len_by_doc) >= 2:
+            l_items = list(len_by_doc.items())
+            for i in range(len(l_items)):
+                for j in range(i + 1, len(l_items)):
+                    doc1, (lmin1, lmax1, lraw1) = l_items[i]
+                    doc2, (lmin2, lmax2, lraw2) = l_items[j]
+                    if abs(lmin1 - lmin2) >= 4.0 or abs(lmax1 - lmax2) >= 5.0:
+                        cross_findings.append(Finding(
+                            id=f"CROSS_LENGTH_CLASH_{i}_{j}",
+                            document_name=f"{doc1} vs {doc2}",
+                            page=None,
+                            severity=Severity.FATAL,
+                            category=Category.CROSS_DOCUMENT,
+                            title="Descalce Dimensional en Longitudes (cm) entre Documentos",
+                            description=(
+                                f"Discrepancia en las longitudes declaradas del dispositivo: '{doc1}' indica {lraw1}, "
+                                f"mientras que '{doc2}' indica {lraw2}. DIGEMID exige concordancia dimensional exacta."
+                            ),
+                            detected_text=f"{doc1}: {lraw1} | {doc2}: {lraw2}",
+                            expected_text="Rango único de longitudes en CLV, Ficha Técnica, IFU y Rótulos",
+                            digemid_norm_ref="D.S. 016-2011-SA Art. 126° y 130°",
+                            remediation_advice="Unificar las longitudes en centímetros en todos los documentos del expediente.",
+                        ))
 
         # 3. Descalce de Vida Útil (Shelf Life)
         shelf_by_doc: Dict[str, Tuple[float, str]] = {}
@@ -611,10 +706,43 @@ class CrossDocumentConsistencyEngine:
                             remediation_advice="Uniformar el calibre de aguja/trocar en la ficha técnica y manual.",
                         ))
 
-        # 10. Validación de Integridad Mínima del Lote Regulatorio
+        # 10. Contradicción Reutilizable vs Un Solo Uso entre documentos
+        reus_by_doc: Dict[str, str] = {}
+        for name, rep in doc_reports.items():
+            if "Un solo uso" in rep.parameters.device_types:
+                reus_by_doc[name] = "Un solo uso / Desechable"
+            elif "Reutilizable" in rep.parameters.device_types:
+                reus_by_doc[name] = "Reutilizable"
+
+        if len(set(reus_by_doc.values())) >= 2:
+            un_docs = [n for n, v in reus_by_doc.items() if "Un solo uso" in v]
+            re_docs = [n for n, v in reus_by_doc.items() if "Reutilizable" in v]
+            cross_findings.append(Finding(
+                id="CROSS_REUSABLE_CLASH",
+                document_name=f"{un_docs[0]} vs {re_docs[0]}",
+                page=None,
+                severity=Severity.FATAL,
+                category=Category.CROSS_DOCUMENT,
+                title="Contradicción Crítica: Dispositivo Declarado como 'Un Solo Uso' y 'Reutilizable'",
+                description=(
+                    f"Contradicción fatal sobre la condición de reuso: '{', '.join(un_docs)}' lo declara como "
+                    f"Un solo uso/Desechable, mientras que '{', '.join(re_docs)}' lo declara como Reutilizable. "
+                    "Esto altera las pruebas de reprocesamiento ISO 17664, estabilidad y rotulado obligatorio (símbolo 2 tachado)."
+                ),
+                detected_text=f"{un_docs[0]}: Un solo uso vs {re_docs[0]}: Reutilizable",
+                expected_text="Condición unívoca (Un solo uso O Reutilizable) en todo el expediente",
+                digemid_norm_ref="D.S. 016-2011-SA Art. 130° y 137° / ISO 15223-1",
+                remediation_advice="Alinear la condición de uso en Ficha Técnica, IFU, Rótulos y símbolos ISO 15223-1.",
+            ))
+
+        # 11. Validación de Integridad Mínima del Lote Regulatorio
         if doc_reports:
             has_valid_medical_doc = any(
-                not any("Documento No Pertinente" in f.title or "Sin Pertinencia Regulatoria" in f.title for f in r.findings)
+                not any(
+                    k in f.title
+                    for f in r.findings
+                    for k in ("Documento No Pertinente", "Sin Pertinencia Regulatoria", "Ilegible o en Blanco", "Error Crítico de Lectura")
+                )
                 for r in doc_reports.values()
             )
             if not has_valid_medical_doc:
@@ -628,9 +756,8 @@ class CrossDocumentConsistencyEngine:
                     description=(
                         "Ninguno de los archivos cargados en este lote corresponde a documentación técnica, "
                         "clínica, analítica ni legal de un dispositivo médico bajo el D.S. 016-2011-SA. "
-                        "El lote está compuesto exclusivamente por documentos ajenos (hojas de vida, facturas, "
-                        "cuentas de cobro o textos no médicos). La presentación de este lote ante DIGEMID / VUCE "
-                        "resultará en rechazo de plano o inadmisibilidad."
+                        "El lote está compuesto exclusivamente por documentos ajenos, ilegibles o no regulatorios. "
+                        "La presentación de este lote ante DIGEMID / VUCE resultará en rechazo de plano o inadmisibilidad."
                     ),
                     detected_text="0 documentos regulatorios válidos en el lote evaluado",
                     expected_text="Expediente técnico con Informe Técnico, Ficha Técnica, Rótulos, IFU y validaciones según D.S. 016-2011-SA",

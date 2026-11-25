@@ -3,6 +3,7 @@ Generador de Reportes de Auditoría Documental para DIGEMID.
 Genera reportes en HTML interactivo (Executive Dashboard), JSON y Markdown.
 """
 
+import html
 import json
 from pathlib import Path
 from typing import Dict, Any, List
@@ -11,25 +12,28 @@ from config import BASE_CASE_INFO, DIGEMID_LEGAL_FRAMEWORK
 
 
 class ReportGenerator:
-    """Generador de reportes visuales y estructurados."""
+    """Generador de reportes visuales y estructurados (con sanitización HTML y soporte en memoria)."""
+
+    @staticmethod
+    def build_json_str(result: BatchAuditResult) -> str:
+        """Retorna el reporte JSON como string listo para descargar."""
+        data = result.to_dict()
+        data["base_case"] = BASE_CASE_INFO
+        return json.dumps(data, indent=2, ensure_ascii=False)
 
     @staticmethod
     def export_json(result: BatchAuditResult, output_path: str) -> None:
         """Exporta los resultados a formato JSON estructurado."""
-        data = result.to_dict()
-        data["base_case"] = BASE_CASE_INFO
         with open(output_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+            f.write(ReportGenerator.build_json_str(result))
 
     @staticmethod
-    def export_markdown(result: BatchAuditResult, output_path: str) -> None:
-        """Exporta un resumen ejecutivo en formato Markdown."""
+    def build_markdown_str(result: BatchAuditResult) -> str:
+        """Genera un resumen ejecutivo y plan de acción en Markdown."""
         summary = result.to_dict()["summary"]
         md_lines = [
             f"# DICTAMEN REGULATORIO DE AUDITORÍA PRE-VUCE DIGEMID",
             f"**Titular:** {BASE_CASE_INFO['titular']} (RUC {BASE_CASE_INFO['ruc_titular']})  ",
-            f"**Fabricante:** {BASE_CASE_INFO['fabricante']}  ",
-            f"**Producto:** {BASE_CASE_INFO['producto']}  ",
             f"**Veredicto Oficial:** **{result.verdict}**  ",
             f"**Probabilidad de Denegatoria ante DIGEMID:** **{result.rejection_probability_pct}%**  \n",
             "---",
@@ -40,17 +44,16 @@ class ReportGenerator:
             f"- **🟡 Observaciones Críticas (Subsanación Obligatoria):** {summary['total_critical']}",
             f"- **🔵 Errores Menores / Tipográficos:** {summary['total_minor']}\n",
             "---",
-            "## 2. HALLAZGOS FATALES DE RECHAZO DIRECTO",
+            "## 2. PLAN DE ACCIÓN Y CORRECCIONES OBLIGATORIAS",
         ]
 
-        fatals = [f for f in result.all_findings if f.severity == Severity.FATAL]
-        if not fatals:
-            md_lines.append("*No se detectaron hallazgos fatales.*")
+        if not result.all_findings:
+            md_lines.append("*No se detectaron hallazgos. Expediente conforme para presentación.*")
         else:
-            for idx, f in enumerate(fatals, 1):
+            for idx, f in enumerate(result.all_findings, 1):
                 p_info = f" (Pág. {f.page})" if f.page else ""
                 md_lines.extend([
-                    f"### {idx}. {f.title}",
+                    f"### {idx}. [{f.severity.value}] {f.title}",
                     f"- **Documento:** `{f.document_name}`{p_info}",
                     f"- **Categoría:** {f.category.value}",
                     f"- **Descripción:** {f.description}",
@@ -60,14 +63,20 @@ class ReportGenerator:
                     f"- **Acción de Remediación:** {f.remediation_advice}\n",
                 ])
 
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write("\n".join(md_lines))
+        return "\n".join(md_lines)
 
     @staticmethod
-    def export_html(result: BatchAuditResult, output_path: str) -> None:
-        """Genera un tablero interactivo moderno en HTML para visualización pericial."""
+    def export_markdown(result: BatchAuditResult, output_path: str) -> None:
+        """Exporta un resumen ejecutivo en formato Markdown."""
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(ReportGenerator.build_markdown_str(result))
+
+    @staticmethod
+    def build_html_str(result: BatchAuditResult) -> str:
+        """Genera un tablero interactivo moderno en HTML en memoria para visualización pericial."""
         data = result.to_dict()
         summary = data["summary"]
+        esc = html.escape
 
         all_findings = result.all_findings
         fatal_findings = [f for f in all_findings if f.severity == Severity.FATAL]
@@ -78,28 +87,28 @@ class ReportGenerator:
         matrix_rows = []
         for name, rep in result.documents.items():
             p = rep.parameters
+            prod = p.detected_product_name or "General"
             fr = p.diameters_fr_raw or "No declarado"
-            cm = p.lengths_cm_raw or "No declarado"
+            cm = p.lengths_cm_raw or (", ".join(p.mesh_dimensions[:2]) if p.mesh_dimensions else "No declarado")
             shelf = p.shelf_life_raw or "No declarado"
             indw = p.indwelling_time_raw or "No declarado"
-            comps = ", ".join(p.components) if p.components else "Estándar"
+            steril = ", ".join(p.sterilization_methods) if p.sterilization_methods else "No declarado"
+            mats = ", ".join(p.materials) if p.materials else "No especificado"
             contam = ", ".join(p.foreign_contaminations) if p.foreign_contaminations else "Ninguna"
 
-            has_error = (
-                "70" in cm or "90" in cm or "1 día" in shelf or "6 meses" in indw
-                or "NO_COMPONENTS" in comps or p.foreign_contaminations
-            )
+            has_error = rep.fatal_count > 0 or bool(p.foreign_contaminations)
             row_class = "danger-row" if has_error else ""
 
             matrix_rows.append(f"""
             <tr class="{row_class}">
-                <td><strong>{name}</strong></td>
-                <td><span class="badge {'badge-danger' if '28' in fr else 'badge-info'}">{fr}</span></td>
-                <td><span class="badge {'badge-danger' if '70' in cm or '90' in cm else 'badge-info'}">{cm}</span></td>
-                <td><span class="badge {'badge-danger' if '1 día' in shelf else 'badge-warning'}">{shelf}</span></td>
-                <td><span class="badge {'badge-danger' if '6 meses' in indw or 'permanente' in indw.lower() else 'badge-warning'}">{indw}</span></td>
-                <td>{comps}</td>
-                <td>{f'<span class="badge badge-danger">{contam}</span>' if p.foreign_contaminations else '<span class="text-success">Limpio</span>'}</td>
+                <td><strong>{esc(name)}</strong><br><small class="text-muted">{esc(prod)}</small></td>
+                <td><span class="badge badge-info">{esc(fr)}</span></td>
+                <td><span class="badge badge-info">{esc(cm)}</span></td>
+                <td><span class="badge {'badge-danger' if '1 día' in shelf else 'badge-warning'}">{esc(shelf)}</span></td>
+                <td><span class="badge badge-warning">{esc(indw)}</span></td>
+                <td>{esc(steril)}</td>
+                <td>{esc(mats)}</td>
+                <td>{f'<span class="badge badge-danger">{esc(contam)}</span>' if p.foreign_contaminations else '<span class="text-success">Limpio</span>'}</td>
             </tr>
             """)
 
@@ -112,27 +121,32 @@ class ReportGenerator:
                 html_cards.append(f"""
                 <div class="card finding-card border-{badge_class}">
                     <div class="card-header d-flex justify-content-between">
-                        <span class="badge badge-{badge_class}">{f.severity.value}</span>
-                        <span class="badge badge-secondary">{f.category.value}</span>
-                        <span class="text-muted"><small><strong>{f.document_name}</strong> ({page_str})</small></span>
+                        <span class="badge badge-{badge_class}">{esc(f.severity.value)}</span>
+                        <span class="badge badge-secondary">{esc(f.category.value)}</span>
+                        <span class="text-muted"><small><strong>{esc(f.document_name)}</strong> ({esc(page_str)})</small></span>
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">{f.title}</h5>
-                        <p class="card-text">{f.description}</p>
+                        <h5 class="card-title">{esc(f.title)}</h5>
+                        <p class="card-text">{esc(f.description)}</p>
                         <div class="diff-box">
-                            <div class="text-danger"><strong>❌ Texto Detectado:</strong> <code>{f.detected_text}</code></div>
-                            <div class="text-success"><strong>✅ Texto Esperado:</strong> <code>{f.expected_text}</code></div>
+                            <div class="text-danger"><strong>❌ Texto Detectado:</strong> <code>{esc(f.detected_text)}</code></div>
+                            <div class="text-success"><strong>✅ Exigencia / Corrección:</strong> <code>{esc(f.expected_text)}</code></div>
                         </div>
                         <div class="legal-box mt-2">
-                            <small><strong>⚖️ Base Legal DIGEMID:</strong> {f.digemid_norm_ref}</small>
+                            <small><strong>⚖️ Base Legal DIGEMID:</strong> {esc(f.digemid_norm_ref)}</small>
                         </div>
                         <div class="remediation-box mt-2">
-                            <small><strong>🛠️ Acción de Remediación Obligatoria:</strong> {f.remediation_advice}</small>
+                            <small><strong>🛠️ Acción de Remediación Obligatoria:</strong> {esc(f.remediation_advice)}</small>
                         </div>
                     </div>
                 </div>
                 """)
             return "\n".join(html_cards)
+
+        verdict_bg = "#fee2e2" if result.total_fatal > 0 else ("#fef3c7" if result.total_critical > 0 else "#dcfce7")
+        verdict_fg = "#991b1b" if result.total_fatal > 0 else ("#92400e" if result.total_critical > 0 else "#166534")
+        verdict_bd = "#ef4444" if result.total_fatal > 0 else ("#f59e0b" if result.total_critical > 0 else "#22c55e")
+        verdict_icon = "⛔" if result.total_fatal > 0 else ("⚠️" if result.total_critical > 0 else "✅")
 
         html_content = f"""<!DOCTYPE html>
 <html lang="es">
@@ -340,15 +354,13 @@ class ReportGenerator:
         <div class="header">
             <h1>AUDITORÍA FORENSE DOCUMENTAL DIGEMID (PERÚ)</h1>
             <div class="header-meta">
-                <strong>Titular Solicitante:</strong> {BASE_CASE_INFO['titular']} (RUC {BASE_CASE_INFO['ruc_titular']}) | 
-                <strong>Fabricante:</strong> {BASE_CASE_INFO['fabricante']} (India) | 
-                <strong>Producto:</strong> {BASE_CASE_INFO['producto']} ({BASE_CASE_INFO['clasificacion_riesgo']})<br>
-                <strong>Antecedentes Críticos:</strong> Exp. 25039778 (Desistido) y Exp. 25157794 (Denegado R.D. N° 4453-2026 / Notificación N° 2026068505)
+                <strong>Titular Solicitante:</strong> {esc(BASE_CASE_INFO['titular'])} (RUC {esc(BASE_CASE_INFO['ruc_titular'])}) | 
+                <strong>Ámbito Regulatorio:</strong> D.S. 016-2011-SA / D.S. 003-2020-SA / Ley N° 29459
             </div>
         </div>
 
-        <div class="verdict-banner">
-            ⛔ {result.verdict} — PROBABILIDAD DE DENEGATORIA: {result.rejection_probability_pct}%
+        <div class="verdict-banner" style="background-color: {verdict_bg}; color: {verdict_fg}; border: 2px solid {verdict_bd};">
+            {verdict_icon} {esc(result.verdict)} — PROBABILIDAD DE DENEGATORIA: {result.rejection_probability_pct}%
         </div>
 
         <div class="kpi-grid">
@@ -393,16 +405,17 @@ class ReportGenerator:
         <div id="tab-matrix" class="tab-pane">
             <div class="card p-3">
                 <h4 style="margin: 0 0 12px 0;">Matriz Dimensional y Clínica Comparativa entre Documentos</h4>
-                <p class="text-muted"><small>Muestra las declaraciones de Calibres Fr, Longitudes cm, Vida útil y Permanencia en cada documento. Las filas en rojo indican discordancias o infiltraciones de otros dispositivos.</small></p>
+                <p class="text-muted"><small>Muestra las declaraciones de Calibres Fr, Longitudes/Dimensiones, Vida útil, Permanencia, Esterilidad y Material por documento. Las filas en rojo indican fallas fatales o contaminaciones.</small></p>
                 <table>
                     <thead>
                         <tr>
-                            <th>Documento</th>
-                            <th>Diámetros (Fr)</th>
-                            <th>Longitudes (cm)</th>
+                            <th>Documento / Dispositivo</th>
+                            <th>Calibres (Fr)</th>
+                            <th>Longitudes / Medidas</th>
                             <th>Vida Útil</th>
                             <th>Permanencia Clínica</th>
-                            <th>Componentes Declarados</th>
+                            <th>Esterilidad</th>
+                            <th>Material</th>
                             <th>Contaminaciones</th>
                         </tr>
                     </thead>
@@ -421,11 +434,11 @@ class ReportGenerator:
                         <tr>
                             <th>Disposición Legal</th>
                             <th>Artículo / Norma</th>
-                            <th>Exigencia Vinculante para Catéter Doble J</th>
+                            <th>Exigencia Vinculante</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {"".join(f"<tr><td><strong>{k}</strong></td><td>{v['articulo']}</td><td>{v['descripcion']}</td></tr>" for k, v in DIGEMID_LEGAL_FRAMEWORK.items())}
+                        {"".join(f"<tr><td><strong>{esc(k)}</strong></td><td>{esc(v['articulo'])}</td><td>{esc(v['descripcion'])}</td></tr>" for k, v in DIGEMID_LEGAL_FRAMEWORK.items())}
                     </tbody>
                 </table>
             </div>
@@ -450,5 +463,11 @@ class ReportGenerator:
 </body>
 </html>
 """
+        return html_content
+
+    @staticmethod
+    def export_html(result: BatchAuditResult, output_path: str) -> None:
+        """Exporta el tablero interactivo HTML a disco."""
+        html_content = ReportGenerator.build_html_str(result)
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(html_content)

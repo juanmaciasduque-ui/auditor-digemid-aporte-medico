@@ -6,11 +6,14 @@ Incluye Mini-Agente Regulatorio DIGEMID para búsqueda normativa en vivo y gener
 
 import os
 import sys
+import html
+import uuid
 import base64
 import tempfile
 from pathlib import Path
 import streamlit as st
 import pandas as pd
+from docx import Document as DocxDocument
 
 from core.auditor import DigemidDocumentAuditor
 from core.report_generator import ReportGenerator
@@ -286,9 +289,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# Estado de sesión
+# Estado de sesión aislado por usuario
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())[:10]
 if "audit_result" not in st.session_state:
     st.session_state.audit_result = None
+if "demo_files" not in st.session_state:
+    st.session_state.demo_files = []
+if "demo_label" not in st.session_state:
+    st.session_state.demo_label = ""
 if "agent" not in st.session_state:
     st.session_state.agent = DigemidAgent()
 
@@ -310,13 +319,13 @@ st.markdown(f"""
         <span class="hero-pill pill-navy">🇵🇪 PERÚ · DIGEMID / MINSA</span>
         <span class="hero-pill pill-blue">⚖️ D.S. 016-2011-SA / D.S. 003-2020-SA</span>
         <span class="hero-pill pill-cyan">🛡️ CONTROL PRE-RADICACIÓN VUCE</span>
-        <span class="hero-pill pill-green">🔒 100% CONFIDENCIAL Y LOCAL</span>
+        <span class="hero-pill pill-green">🩺 CATÁLOGO COMPLETO APORTE MÉDICO / UROTIENDA</span>
     </div>
     <h1 class="hero-title">AUDITOR FORENSE DOCUMENTAL</h1>
     <h2 class="hero-company">APORTE MÉDICO PERÚ S.A.C.</h2>
     <p class="hero-subtitle">
-        Inspección técnica automatizada de expedientes para registros sanitarios de <strong>Dispositivos Médicos (Clases I, IIa, IIb, III y IV)</strong>.
-        Detección pericial de inconsistencias cruzadas, descalces de medidas, incongruencias de esterilización, errores de traducción y causales de rechazo oficial.
+        Inspección técnica automatizada de expedientes para registros sanitarios de <strong>Dispositivos Médicos (Clases I, IIa, IIb, III y IV)</strong>:
+        Catéteres Doble J, Cintas Vaginales TOT/TVT, Canastillas de Nitinol, Camisas Ureterales, Asas Monopolares/Bipolares, Uroclamp®, Uicop®, Rehabilitadores KM 526, Pesas Íntimas y Conductores Metálicos.
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -349,6 +358,38 @@ with col_info_fam:
     """, unsafe_allow_html=True)
 
 
+def _build_cloud_demo_dossier(demo_dir: Path) -> list:
+    """Genera un expediente de prueba realista en DOCX para demostración en la nube."""
+    demo_dir.mkdir(parents=True, exist_ok=True)
+    files = []
+
+    d1 = DocxDocument()
+    d1.add_heading("CARTA DE AUTORIZACIÓN DEL FABRICANTE", level=1)
+    d1.add_paragraph("Nosotros, ACE MEDICAL DEVICES PVT. LTD. (E-1/7 Neptune Society, Pune, India), confirmamos a APORTE MEDICO S.A.S. Manizales - Colombia como TITULAR DE LOS REGISTROS SANITARIOS en Colombia.")
+    d1.add_paragraph("Producto: Catéter Ureteral Doble J. Rango autorizado: 3-8 Fr, longitud 6-32 cm. Vida útil: 3 años (36 meses).")
+    p1 = demo_dir / "01_Carta_Autorizacion_Demo.docx"
+    d1.save(str(p1))
+    files.append(p1)
+
+    d2 = DocxDocument()
+    d2.add_heading("STERILIZATION VALIDATION REPORT (EO)", level=1)
+    d2.add_paragraph("Section 1.0: In this study 2 half cycles were carried out. Sterilization achieved SAL of 10^6 under ISO 111737 and ISO 14971:2012.")
+    d2.add_paragraph("Section 4.0: Three half cycles were performed. Biological indicator Bacillus atrophaeus 106 spores. Shelf life validated: 5 años (60 meses). Calibres 2-12 Fr.")
+    p2 = demo_dir / "02_Validacion_EO_Demo.docx"
+    d2.save(str(p2))
+    files.append(p2)
+
+    d3 = DocxDocument()
+    d3.add_heading("INSTRUCCIONES DE USO (IFU) Y ROTULADO", level=1)
+    d3.add_paragraph("Artwork code with Rev. No.: ")
+    d3.add_paragraph("Advertencia: El doble coleta no debe mantenerse mora en la vegiga. Consulte el gato No. 405. Importado por Consorcio Teleandes S.A.C. RUC 20537638631.")
+    p3 = demo_dir / "03_IFU_Rotulado_Demo.docx"
+    d3.save(str(p3))
+    files.append(p3)
+
+    return files
+
+
 # ==============================================================================
 # ZONA DE CARGA DE DOCUMENTOS Y BANCO DE PRUEBAS
 # ==============================================================================
@@ -356,47 +397,76 @@ c_upload, c_quick = st.columns([2.8, 1.2])
 
 with c_upload:
     uploaded_files = st.file_uploader(
-        "📂 Arrastre aquí los documentos (PDFs, Word DOCX) o seleccione los archivos del expediente técnico:",
-        type=["pdf", "docx"],
+        "📂 Arrastre aquí los documentos (PDF, Word DOCX, Imágenes escaneadas PNG/JPG) del expediente:",
+        type=["pdf", "docx", "png", "jpg", "jpeg", "tiff", "bmp"],
         accept_multiple_files=True,
-        help="Puede arrastrar decenas de archivos o carpetas completas. Soporta expedientes técnicos de hasta 2 GB."
+        help="Puede arrastrar múltiples archivos simultáneamente. Soporta expedientes técnicos de hasta 2 GB."
+    )
+    full_ocr_mode = st.checkbox(
+        "🔍 OCR Profundo en todas las páginas (recomendado para PDFs escaneados mayores a 25 páginas)",
+        value=False
     )
 
 with c_quick:
+    has_local_cases = DEFAULT_TEST_DATA_DIR.exists() or VAGINAL_SLING_DATA_DIR.exists()
     st.markdown("""
     <div style="font-weight: 700; color: #1e3a8a; margin-bottom: 6px; font-size: 0.92rem;">
-        ⚡ Pruebas con Expedientes Reales:
+        ⚡ Banco de Pruebas y Simulador:
     </div>
     """, unsafe_allow_html=True)
-    test_suite_btn = st.button("🧪 Caso 1: Catéteres Doble J\n(ACE Medical · India)", use_container_width=True)
-    test_sling_btn = st.button("🧪 Caso 2: Cinta Vaginal / Mallas\n(Orion · Malla TOT/TVT)", use_container_width=True)
+    test_suite_btn = False
+    test_sling_btn = False
+    if DEFAULT_TEST_DATA_DIR.exists():
+        test_suite_btn = st.button("🧪 Caso 1: Catéteres Doble J\n(ACE Medical · Local)", width="stretch")
+    if VAGINAL_SLING_DATA_DIR.exists():
+        test_sling_btn = st.button("🧪 Caso 2: Cinta Vaginal / Mallas\n(Orion · Local)", width="stretch")
+    demo_btn = st.button("🧪 Cargar Expediente Demo\n(Simulador con Fallas Reales)", width="stretch")
 
 archivos_para_auditar = []
 
-if test_suite_btn:
-    if DEFAULT_TEST_DATA_DIR.exists():
-        archivos_para_auditar = list(DEFAULT_TEST_DATA_DIR.glob("*.pdf")) + list(DEFAULT_TEST_DATA_DIR.glob("*.docx"))
-        archivos_para_auditar = [f for f in archivos_para_auditar if "EXPEDIENTE" not in f.name.upper() and "DOCUMENTOS TÉCNICOS" not in f.name.upper()]
-        st.toast(f"Cargados {len(archivos_para_auditar)} documentos del Caso Real 1 (Catéteres Doble J).", icon="📂")
-    else:
-        st.error(f"No se encontró el directorio base {DEFAULT_TEST_DATA_DIR}")
+if test_suite_btn and DEFAULT_TEST_DATA_DIR.exists():
+    files_1 = list(DEFAULT_TEST_DATA_DIR.glob("*.pdf")) + list(DEFAULT_TEST_DATA_DIR.glob("*.docx"))
+    files_1 = [f for f in files_1 if "EXPEDIENTE" not in f.name.upper() and "DOCUMENTOS TÉCNICOS" not in f.name.upper()]
+    st.session_state.demo_files = [str(f) for f in files_1]
+    st.session_state.demo_label = "Caso Real 1 (Catéteres Doble J)"
+    st.toast(f"Cargados {len(files_1)} documentos del Caso Real 1.", icon="📂")
 
-elif test_sling_btn:
-    if VAGINAL_SLING_DATA_DIR.exists():
-        archivos_para_auditar = list(VAGINAL_SLING_DATA_DIR.glob("*.pdf")) + list(VAGINAL_SLING_DATA_DIR.glob("*.docx"))
-        archivos_para_auditar = [f for f in archivos_para_auditar if not f.is_dir()][:10]
-        st.toast(f"Cargados {len(archivos_para_auditar)} documentos del Caso Real 2 (Cintas Vaginales / Mallas).", icon="📂")
-    else:
-        st.error(f"No se encontró el directorio base {VAGINAL_SLING_DATA_DIR}")
+elif test_sling_btn and VAGINAL_SLING_DATA_DIR.exists():
+    files_2 = list(VAGINAL_SLING_DATA_DIR.glob("*.pdf")) + list(VAGINAL_SLING_DATA_DIR.glob("*.docx"))
+    files_2 = [f for f in files_2 if not f.is_dir()][:10]
+    st.session_state.demo_files = [str(f) for f in files_2]
+    st.session_state.demo_label = "Caso Real 2 (Cintas Vaginales / Mallas)"
+    st.toast(f"Cargados {len(files_2)} documentos del Caso Real 2.", icon="📂")
 
-elif uploaded_files:
-    temp_dir = Path(tempfile.gettempdir()) / "aporte_digemid_uploads"
+elif demo_btn:
+    demo_dir = Path(tempfile.gettempdir()) / f"aporte_demo_{st.session_state.session_id}"
+    demo_list = _build_cloud_demo_dossier(demo_dir)
+    st.session_state.demo_files = [str(f) for f in demo_list]
+    st.session_state.demo_label = "Expediente Demo Simulado"
+    st.toast(f"Cargados {len(demo_list)} documentos de demostración.", icon="🧪")
+
+if uploaded_files:
+    # Si el usuario sube archivos propios, tienen prioridad sobre el demo
+    st.session_state.demo_files = []
+    temp_dir = Path(tempfile.gettempdir()) / f"aporte_digemid_uploads_{st.session_state.session_id}"
     temp_dir.mkdir(parents=True, exist_ok=True)
+    current_names = set()
     for uf in uploaded_files:
-        dest = temp_dir / uf.name
+        safe_fname = Path(uf.name).name
+        current_names.add(safe_fname)
+        dest = temp_dir / safe_fname
         with open(dest, "wb") as f:
             f.write(uf.getbuffer())
         archivos_para_auditar.append(dest)
+    # Limpiar archivos antiguos que el usuario quitó del cargador
+    for existing in temp_dir.iterdir():
+        if existing.is_file() and existing.name not in current_names:
+            try:
+                existing.unlink()
+            except Exception:
+                pass
+elif st.session_state.demo_files:
+    archivos_para_auditar = [Path(p) for p in st.session_state.demo_files if Path(p).exists()]
 
 
 # ==============================================================================
@@ -408,11 +478,11 @@ if archivos_para_auditar:
     with col_act1:
         st.info(f"📋 **{len(archivos_para_auditar)} documentos listos para auditar:** {', '.join([f.name for f in archivos_para_auditar[:4]])}{'...' if len(archivos_para_auditar) > 4 else ''}")
     with col_act2:
-        ejecutar = st.button("🚀 INICIAR AUDITORÍA FORENSE", type="primary", use_container_width=True)
+        ejecutar = st.button("🚀 INICIAR AUDITORÍA FORENSE", type="primary", width="stretch")
 
     if ejecutar:
-        with st.spinner("Ejecutando lectura neuronal OCR, extracción y matriz de concordancia cruzada..."):
-            auditor = DigemidDocumentAuditor(enable_ocr=True)
+        with st.spinner("Ejecutando lectura neuronal OCR, extracción normativa y matriz de concordancia cruzada..."):
+            auditor = DigemidDocumentAuditor(enable_ocr=True, full_ocr=full_ocr_mode)
             pbar = st.progress(0.0)
             status_lbl = st.empty()
 
@@ -420,7 +490,11 @@ if archivos_para_auditar:
                 pbar.progress(curr / max(1, tot))
                 status_lbl.caption(f"[{curr}/{tot}] {msg}")
 
-            res = auditor.audit_batch([str(p) for p in archivos_para_auditar], progress_callback=pcb)
+            res = auditor.audit_batch(
+                [str(p) for p in archivos_para_auditar],
+                progress_callback=pcb,
+                product_family=selected_family_key,
+            )
             pbar.empty()
             status_lbl.empty()
             st.session_state.audit_result = res
@@ -437,8 +511,8 @@ if res is not None:
 
     # BANNER DE DICTAMEN PERICIAL
     prob = res.rejection_probability_pct
-    verdict = res.verdict
-    
+    verdict = html.escape(res.verdict)
+
     if res.total_fatal > 0:
         st.markdown(f"""
         <div style="background: linear-gradient(135deg, #fff1f2 0%, #fee2e2 100%); border: 2px solid #f87171; border-radius: 14px; padding: 20px 24px; margin-bottom: 22px;">
@@ -520,28 +594,52 @@ if res is not None:
     st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
 
     # PESTAÑAS DE ANÁLISIS ESTRUCTURADO
-    tab_fatal, tab_critical, tab_minor, tab_matrix, tab_agent, tab_docs = st.tabs([
+    tab_plan, tab_fatal, tab_critical, tab_minor, tab_matrix, tab_agent, tab_docs = st.tabs([
+        f"🛠️ Plan de Correcciones ({len(res.all_findings)})",
         f"🔴 Fallas Fatales ({res.total_fatal})",
         f"🟡 Observaciones Críticas ({res.total_critical})",
         f"🔵 Errores Menores ({res.total_minor})",
-        "📊 Matriz Dimensional Cruzada",
-        "🤖 Mini-Agente y Buscador DIGEMID",
+        "📊 Matriz Cruzada",
+        "🤖 Agente DIGEMID",
         "📄 Detalle por Documento"
     ])
 
     def render_finding_box(f):
         badge_cls = "badge-fatal" if f.severity == Severity.FATAL else ("badge-critical" if f.severity == Severity.CRITICAL else "badge-minor")
+        det_esc = html.escape(str(f.detected_text or ""))
+        exp_esc = html.escape(str(f.expected_text or ""))
         with st.expander(f"[{f.severity.value}] {f.title} — {f.document_name}", expanded=(f.severity == Severity.FATAL)):
-            st.markdown(f"<span class='badge {badge_cls}'>{f.severity.value}</span> | **Categoría:** {f.category.value} | **Página:** {f.page or 'General'}", unsafe_allow_html=True)
+            st.markdown(f"<span class='badge {badge_cls}'>{html.escape(f.severity.value)}</span> | **Categoría:** {f.category.value} | **Página:** {f.page or 'General'}", unsafe_allow_html=True)
             st.write(f.description)
             st.markdown(f"""
             <div class="diff-container">
-                <div class="diff-detected"><strong>❌ Detectado en Documento:</strong> <code>{f.detected_text}</code></div>
-                <div class="diff-expected"><strong>✅ Exigencia Reglamentaria:</strong> <code>{f.expected_text}</code></div>
+                <div class="diff-detected"><strong>❌ Detectado en Documento:</strong> <code>{det_esc}</code></div>
+                <div class="diff-expected"><strong>✅ Exigencia Reglamentaria:</strong> <code>{exp_esc}</code></div>
             </div>
             """, unsafe_allow_html=True)
             st.info(f"**⚖️ Exigencia Legal DIGEMID:** {f.digemid_norm_ref}")
             st.success(f"**🛠️ Instrucción de Subsanación Pericial:** {f.remediation_advice}")
+
+    with tab_plan:
+        st.markdown("### 🛠️ Lista Maestra de Correcciones Obligatorias (Qué se debe corregir antes de radicar)")
+        if not res.all_findings:
+            st.success("🎉 ¡Expediente limpio! No existen errores que corregir antes de su radicación en VUCE.")
+        else:
+            plan_rows = []
+            severity_order = {Severity.FATAL: 0, Severity.CRITICAL: 1, Severity.MINOR: 2}
+            sorted_findings = sorted(res.all_findings, key=lambda x: severity_order.get(x.severity, 3))
+            for idx_p, f in enumerate(sorted_findings, 1):
+                prio = "🔴 INMEDIATA (FATAL)" if f.severity == Severity.FATAL else ("🟡 OBLIGATORIA (CRÍTICA)" if f.severity == Severity.CRITICAL else "🔵 FORMA (MENOR)")
+                plan_rows.append({
+                    "#": idx_p,
+                    "Prioridad": prio,
+                    "Archivo": f.document_name,
+                    "Pág.": str(f.page) if f.page else "Cruzado",
+                    "Error Detectado": f.title,
+                    "Qué Corregir (Acción Exacta)": f.remediation_advice,
+                    "Norma DIGEMID": f.digemid_norm_ref,
+                })
+            st.dataframe(pd.DataFrame(plan_rows), width="stretch", hide_index=True)
 
     with tab_fatal:
         fatals = [f for f in res.all_findings if f.severity == Severity.FATAL]
@@ -568,20 +666,22 @@ if res is not None:
                 render_finding_box(f)
 
     with tab_matrix:
-        st.markdown("### 📊 Matriz Dimensional y Clínica Comparativa entre Documentos")
+        st.markdown("### 📊 Matriz Dimensional, Clínica y de Materiales Comparativa entre Documentos")
         matrix_rows = []
         for name, rep in res.documents.items():
             p = rep.parameters
             matrix_rows.append({
                 "Documento": name,
+                "Producto Detectado": p.detected_product_name or "General",
                 "Calibres Fr": p.diameters_fr_raw or "No declarado",
-                "Longitudes cm": p.lengths_cm_raw or "No declarado",
+                "Longitudes / Medidas": p.lengths_cm_raw or (", ".join(p.mesh_dimensions[:2]) if p.mesh_dimensions else "No declarado"),
                 "Vida Útil": p.shelf_life_raw or "No declarado",
-                "Permanencia Clínica": p.indwelling_time_raw or "No declarado",
-                "Componentes": ", ".join(p.components) if p.components else "Estándar",
+                "Permanencia": p.indwelling_time_raw or "No declarado",
+                "Esterilidad": ", ".join(p.sterilization_methods) if p.sterilization_methods else "No declarado",
+                "Material": ", ".join(p.materials) if p.materials else "No especificado",
                 "Contaminaciones": ", ".join(p.foreign_contaminations) if p.foreign_contaminations else "Limpio",
             })
-        st.dataframe(pd.DataFrame(matrix_rows), use_container_width=True)
+        st.dataframe(pd.DataFrame(matrix_rows), width="stretch", hide_index=True)
 
         if res.cross_findings:
             st.markdown("#### Inconsistencias Cruzadas Detectadas:")
@@ -591,14 +691,14 @@ if res is not None:
     # PESTAÑA DEL MINI-AGENTE REGULATORIO DIGEMID
     with tab_agent:
         st.markdown("### 🤖 Mini-Agente Regulatorio y Buscador en Vivo DIGEMID")
-        st.write("Consulte la normativa actualizada de DIGEMID, precedentes de dispositivos aprobados en Perú y descargue modelos de subsanación técnica.")
+        st.write("Consulte la normativa actualizada de DIGEMID, precedentes de todo el catálogo Aporte Médico / Urotienda y descargue modelos de subsanación técnica.")
 
         col_q1, col_q2 = st.columns([3, 1])
         with col_q1:
-            query = st.text_input("🔍 Buscar norma, requisito o precedente en DIGEMID:", value="flujograma breve descripción")
+            query = st.text_input("🔍 Buscar norma, requisito o precedente en DIGEMID:", value="Art. 130")
         with col_q2:
             st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-            buscar_btn = st.button("Buscar en DIGEMID", use_container_width=True)
+            buscar_btn = st.button("Buscar en DIGEMID", width="stretch")
 
         if query:
             results = agent.search_regulations(query)
@@ -610,7 +710,7 @@ if res is not None:
                             st.markdown(f"**{art}:**")
                             st.write(desc)
             else:
-                st.info("No se encontraron coincidencias exactas. Intente con términos como 'Art. 130', 'flujograma', 'esterilización' o 'ftalatos'.")
+                st.info("No se encontraron coincidencias exactas. Intente con términos como 'Art. 128', 'Art. 130', 'uroclamp', 'iec 60601', 'flujograma' o 'ftalatos'.")
 
         st.markdown("---")
         st.markdown("#### 📝 Generador de Soluciones y Redactados Oficiales para VUCE")
@@ -623,6 +723,9 @@ if res is not None:
                 ("FLUJOGRAMA_ART130", "Descripción Narrativa Resumida de Etapas del Flujograma (Art. 130° num. 5)"),
                 ("ESTERILIZACION_SAL", "Justificación Científica de Esterilidad EO y SAL 10^-6 (ISO 11135)"),
                 ("INFILTRACION_LONGITUDES", "Sustento Técnico para Separar Ureteral Catheter (70-90 cm) del Stent (6-32 cm)"),
+                ("REPROCESAMIENTO_ISO17664", "Protocolo de Limpieza / Reprocesamiento para Reutilizables (Uroclamp®, Conductores, Pesas)"),
+                ("ACTIVOS_IEC60601", "Cláusula de Seguridad Eléctrica y Contraindicaciones (KM 526 / Asas Electroquirúrgicas)"),
+                ("COLOMBIA_A_PERU_ADAPTACION", "Adecuación Documental de Origen Colombia (Aporte Médico S.A.S.) a Perú (DIGEMID)"),
             ],
             format_func=lambda x: x[1]
         )
@@ -637,14 +740,14 @@ if res is not None:
         st.caption(f"💡 **Recomendación Pericial:** {sol_data['instrucciones']}")
 
         st.markdown("---")
-        st.markdown("#### 🏆 Precedentes de Dispositivos Aprobados en DIGEMID (Benchmark)")
+        st.markdown("#### 🏆 Precedentes y Perfiles Regulatorios del Catálogo Aporte Médico / Urotienda en DIGEMID")
         prec_list = agent.get_precedents_for_product()
         for p in prec_list:
-            with st.expander(f"Registro Sanitario {p.registro_sanitario} — {p.producto}"):
+            with st.expander(f"{p.registro_sanitario} — {p.producto}"):
                 st.write(f"**Titular:** {p.titular} | **Fabricante:** {p.fabricante}")
-                st.write(f"**Calibres Aprobados:** {p.calibres_fr} | **Longitudes:** {p.longitudes_cm}")
-                st.write(f"**Vida Útil Aprobada:** {p.vida_util} | **Tiempo de Permanencia:** {p.tiempo_permanencia}")
-                st.write(f"**Material:** {p.material}")
+                st.write(f"**Calibres / Tallas:** {p.calibres_fr} | **Longitudes / Medidas:** {p.longitudes_cm}")
+                st.write(f"**Vida Útil / Condición:** {p.vida_util} | **Permanencia Clínica:** {p.tiempo_permanencia}")
+                st.write(f"**Material / Normas:** {p.material}")
 
     with tab_docs:
         doc_sel = st.selectbox("Seleccione el documento a inspeccionar:", list(res.documents.keys()))
@@ -658,37 +761,39 @@ if res is not None:
 
             st.json(d_rep.parameters.to_dict())
             st.markdown(f"##### Hallazgos en `{doc_sel}` ({len(d_rep.findings)}):")
-            for f in d_rep.findings:
-                render_finding_box(f)
+            if not d_rep.findings:
+                st.success("✅ Sin hallazgos individuales detectados en este documento.")
+            else:
+                for f in d_rep.findings:
+                    render_finding_box(f)
 
-    # EXPORTACIÓN DE REPORTES
+    # EXPORTACIÓN DE REPORTES EN MEMORIA (SEGURO PARA MÚLTIPLES USUARIOS EN LA NUBE)
     st.markdown("---")
-    st.markdown("### 📥 Descargar Dictámenes Periciales")
-    c_d1, c_d2 = st.columns(2)
+    st.markdown("### 📥 Descargar Dictámenes Periciales y Plan de Corrección")
+    c_d1, c_d2, c_d3 = st.columns(3)
 
-    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    out_html = REPORTS_DIR / "Dictamen_Pericial_DIGEMID.html"
-    out_json = REPORTS_DIR / "Dictamen_Pericial_DIGEMID.json"
-
-    ReportGenerator.export_html(res, str(out_html))
-    ReportGenerator.export_json(res, str(out_json))
-
-    with open(out_html, "r", encoding="utf-8") as f:
-        html_bytes = f.read().encode("utf-8")
-    with open(out_json, "r", encoding="utf-8") as f:
-        json_bytes = f.read().encode("utf-8")
+    html_bytes = ReportGenerator.build_html_str(res).encode("utf-8")
+    json_bytes = ReportGenerator.build_json_str(res).encode("utf-8")
+    md_bytes = ReportGenerator.build_markdown_str(res).encode("utf-8")
 
     c_d1.download_button(
-        "📄 Descargar Reporte HTML Interactivo",
+        "📄 Reporte HTML Interactivo",
         data=html_bytes,
         file_name="Reporte_Auditoria_DIGEMID.html",
         mime="text/html",
-        use_container_width=True
+        width="stretch"
     )
     c_d2.download_button(
-        "📊 Descargar Datos JSON Estructurados",
+        "📝 Plan de Correcciones (MD)",
+        data=md_bytes,
+        file_name="Plan_Correcciones_DIGEMID.md",
+        mime="text/markdown",
+        width="stretch"
+    )
+    c_d3.download_button(
+        "📊 Datos Estructurados JSON",
         data=json_bytes,
         file_name="Reporte_Auditoria_DIGEMID.json",
         mime="application/json",
-        use_container_width=True
+        width="stretch"
     )

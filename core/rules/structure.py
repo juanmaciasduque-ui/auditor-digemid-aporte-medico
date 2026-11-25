@@ -94,6 +94,30 @@ class StructureIntegrityRules:
                     remediation_advice="Eliminar los comentarios de borrador y redactar el contenido técnico faltante.",
                 ))
 
+            # Búsqueda de campos de encabezado críticos dejados con guiones bajos en blanco (ej: Fecha: ____, Rev. No.: ____)
+            blank_header = re.search(
+                r'\b(?:Date|Fecha|Rev\.?\s*No\.?|Lot\s*No\.?|Batch\s*No\.?|Effective\s+Date|Approved\s+by)\s*[:\-]?\s*_{3,}',
+                text,
+                re.IGNORECASE
+            )
+            if blank_header:
+                findings.append(Finding(
+                    id=f"STR_BLANK_HEADER_{doc_name}_{page_num}",
+                    document_name=doc_name,
+                    page=page_num,
+                    severity=Severity.CRITICAL,
+                    category=Category.VISUAL_STRUCTURE,
+                    title="Campo de Control Documental en Blanco (Guiones Bajos '___')",
+                    description=(
+                        f"En la página {page_num} se detectó un campo de control o trazabilidad sin llenar: "
+                        f"'{blank_header.group(0).strip()}'. DIGEMID exige documentos controlados con fecha, versión y aprobación vigentes."
+                    ),
+                    detected_text=blank_header.group(0).strip(),
+                    expected_text="Valor real diligenciado (fecha, revisión o número de lote)",
+                    digemid_norm_ref="D.S. 016-2011-SA Art. 130° / ISO 13485:2016",
+                    remediation_advice="Completar el campo vacío en la plantilla controlada antes de exportar a PDF.",
+                ))
+
         return findings
 
     def _check_complies_only_tables(
@@ -104,9 +128,13 @@ class StructureIntegrityRules:
     ) -> List[Finding]:
         findings = []
 
-        # Analizar si es un reporte de validación o ensayo
+        # Analizar si es un reporte de validación, ensayo, COA, GSPR o biocompatibilidad
         doc_lower = doc_name.lower()
-        if not any(k in doc_lower for k in ["sterilization", "esterilizacion", "validation", "dvr", "verification"]):
+        if not any(k in doc_lower for k in [
+            "sterilization", "esterilizacion", "esterilización", "validation", "validacion",
+            "dvr", "verification", "verificacion", "coa", "analysis", "analisis", "análisis",
+            "gspr", "biocompat", "stability", "estabilidad"
+        ]):
             return findings
 
         for t_info in tables_data:
@@ -118,7 +146,7 @@ class StructureIntegrityRules:
             complies_count = 0
             total_data_cells = 0
 
-            for r in rows[1:]: # Omitir cabecera
+            for r in rows[1:]:  # Omitir cabecera
                 for cell in r:
                     val = str(cell).strip().lower()
                     if val in ["complies", "cumple", "pass", "ok"]:
@@ -126,7 +154,7 @@ class StructureIntegrityRules:
                     if len(val) > 0:
                         total_data_cells += 1
 
-            # Si más del 70% de las celdas de datos son simplemente "Complies" sin valores numéricos
+            # Si más del 70% de las celdas de datos son simplemente "Complies" sin valores numéricos ni evidencias
             if total_data_cells >= 4 and (complies_count / total_data_cells) >= 0.70:
                 findings.append(Finding(
                     id=f"STR_COMPLIES_ONLY_{doc_name}_{page_num}",
@@ -134,19 +162,19 @@ class StructureIntegrityRules:
                     page=page_num,
                     severity=Severity.CRITICAL,
                     category=Category.VISUAL_STRUCTURE,
-                    title="Tabla de Validación con Relleno Exclusivo 'Complies' Sin Datos Cuantitativos",
+                    title="Tabla Técnica con Relleno Exclusivo 'Complies' Sin Datos Cuantitativos ni Evidencia",
                     description=(
                         f"En la página {page_num}, la tabla técnica contiene {complies_count} celdas marcadas "
-                        "únicamente como 'Complies', sin reportar valores reales medidos, fechas de corrida, "
-                        "números de lote del stent ni identificación de la cámara o equipos. "
-                        "DIGEMID observa protocolos que no demuestran trazabilidad cuantitativa real."
+                        "únicamente como 'Complies/Cumple', sin reportar valores reales medidos, fechas de corrida, "
+                        "números de lote ni código de documento de respaldo. "
+                        "DIGEMID observa protocolos y checklists GSPR que no demuestran trazabilidad cuantitativa real."
                     ),
                     detected_text=f"{complies_count} de {total_data_cells} celdas dicen solo 'Complies'",
-                    expected_text="Parámetros reales: Lote, fecha, concentración EO, temperatura, D-value, resultado numérico",
-                    digemid_norm_ref="D.S. 016-2011-SA Art. 130° / ISO 11135",
-                    remediation_advice="Reemplazar 'Complies' por datos específicos de las corridas de validación física y microbiológica.",
+                    expected_text="Parámetros reales: Lote, fecha, valor numérico medido y referencia exacta de informe",
+                    digemid_norm_ref="D.S. 016-2011-SA Art. 130° / D.S. 003-2020-SA",
+                    remediation_advice="Reemplazar 'Complies' por datos cuantitativos específicos y trazables a los reportes de laboratorio.",
                 ))
-                break # Una alerta por tabla/documento es suficiente
+                break  # Una alerta por tabla/documento es suficiente
 
         return findings
 
@@ -192,10 +220,8 @@ class StructureIntegrityRules:
 
                     # Si es NABL ISO 10993-7
                     if "10993-7" in matched_str:
-                        # Buscar si hay mención explícita a un reporte NABL con número en todo el documento o paquete
                         if not any("nabl" in d or "residual" in d or "10993-7" in d for d in all_docs_lower):
-                            # Tampoco hay reporte NABL con mg/dispositivo en el texto
-                            if not re.search(r'\b(?:mg/device|µg/device|mg/dispositivo)\b', full_lower):
+                            if not re.search(r'\b(?:mg/device|µg/device|ug/device|mg/dispositivo)\b', full_lower):
                                 findings.append(Finding(
                                     id=f"ANNEX_MISSING_NABL_{doc_name}_{page_num}",
                                     document_name=doc_name,
@@ -215,11 +241,9 @@ class StructureIntegrityRules:
                                     remediation_advice="Adjuntar el informe de ensayo de residuales emitido por el laboratorio NABL acreditado.",
                                 ))
 
-                    elif "Annexure" in matched_str:
-                        # Extraer el identificador del anexo
+                    elif "annexure" in matched_str.lower():
                         m_id = re.search(r'Annexure\s+(\d+|[A-Z0-9]+)', matched_str, re.IGNORECASE)
                         annex_id = m_id.group(1) if m_id else ""
-                        # Verificar si existe en el texto del documento
                         if f"annexure {annex_id.lower()}" not in full_lower.replace(matched_str.lower(), ""):
                             findings.append(Finding(
                                 id=f"ANNEX_MISSING_{annex_id}_{doc_name}_{page_num}",
@@ -236,6 +260,47 @@ class StructureIntegrityRules:
                                 expected_text=f"Anexo {annex_id} completo incorporado al final del documento",
                                 digemid_norm_ref="D.S. 016-2011-SA Art. 130°",
                                 remediation_advice=f"Incorporar físicamente el Annexure {annex_id} prometido en el índice y anexo.",
+                            ))
+
+                    elif "pms report" in matched_str.lower():
+                        has_pms_doc = any("pms" in d or "post-market" in d or "vigilancia" in d for d in all_docs_lower)
+                        has_pms_section = bool(re.search(r'\b(?:post[- ]market\s+surveillance|pms\s+data|vigilancia\s+post)\b', full_lower.replace(matched_str.lower(), "")))
+                        if not has_pms_doc and not has_pms_section:
+                            findings.append(Finding(
+                                id=f"ANNEX_MISSING_PMS_{doc_name}_{page_num}",
+                                document_name=doc_name,
+                                page=page_num,
+                                severity=Severity.CRITICAL,
+                                category=Category.VISUAL_STRUCTURE,
+                                title="Reporte PMS (Post-Market Surveillance) Prometido pero Ausente",
+                                description=(
+                                    f"En la página {page_num} se cita '{matched_str}', pero el reporte de vigilancia "
+                                    "post-comercialización (PMS) no fue incorporado ni cargado en el paquete."
+                                ),
+                                detected_text=matched_str,
+                                expected_text="Reporte PMS / PSUR completo firmado adjunto al expediente",
+                                digemid_norm_ref="D.S. 016-2011-SA Art. 130° / MEDDEV 2.7/1",
+                                remediation_advice="Adjuntar el Reporte PMS completo o retirar la mención de anexo si no aplica.",
+                            ))
+
+                    elif "in-dm-" in matched_str.lower():
+                        anx_clean = matched_str.lower()
+                        if anx_clean not in full_lower.replace(anx_clean, "") and not any(anx_clean in d for d in all_docs_lower):
+                            findings.append(Finding(
+                                id=f"ANNEX_MISSING_INDM_{doc_name}_{page_num}",
+                                document_name=doc_name,
+                                page=page_num,
+                                severity=Severity.CRITICAL,
+                                category=Category.VISUAL_STRUCTURE,
+                                title=f"Anexo Citado No Encontrado ({matched_str})",
+                                description=(
+                                    f"En la página {page_num} se referencia '{matched_str}', "
+                                    "sin que exista dicho anexo dentro del archivo ni en los documentos cargados."
+                                ),
+                                detected_text=matched_str,
+                                expected_text=f"Documento o sección '{matched_str}' debidamente incorporada",
+                                digemid_norm_ref="D.S. 016-2011-SA Art. 130°",
+                                remediation_advice=f"Adjuntar o armonizar el código del {matched_str}.",
                             ))
 
         return findings
