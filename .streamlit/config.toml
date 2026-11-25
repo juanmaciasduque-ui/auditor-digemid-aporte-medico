@@ -1,7 +1,7 @@
 [server]
 maxUploadSize = 2048 # Permite expedientes técnicos de hasta 2 GB
 enableXsrfProtection = false
-headless = false
+headless = true
 port = 8501
 
 [browser]
